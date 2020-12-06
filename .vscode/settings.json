@@ -1,0 +1,10 @@
+{
+    "go.coverOnSave": true,
+    "go.coverOnSingleTest": true,
+    "go.coverOnSingleTestFile": true,
+    "go.testOnSave": true,
+    "go.enableCodeLens": {
+        "references": true,
+        "runtest": true
+    }
+}
