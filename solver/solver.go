@@ -1,10 +1,13 @@
 package solver
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/Spi1y/tsp-solver/solver/matrix"
+)
 
 // Solve solves the TSP problem with a given distance matrix.
-// Distance matrix must be square.
-func Solve(distanceMatrix [][]int) ([]int, error) {
+func Solve(distanceMatrix matrix.Matrix) ([]int, error) {
 	size := len(distanceMatrix)
 
 	if size == 0 {
@@ -15,6 +18,15 @@ func Solve(distanceMatrix [][]int) ([]int, error) {
 		if len(row) != size {
 			return nil, errors.New("matrix must be square")
 		}
+	}
+
+	//rotNode := solutionNode{
+	_ = solutionNode{
+		parent:        nil,
+		point:         0,
+		projectedCost: 0,
+		actualCost:    0,
+		matrix:        nil,
 	}
 
 	return nil, nil

@@ -3,11 +3,13 @@ package solver
 import (
 	"reflect"
 	"testing"
+
+	"github.com/Spi1y/tsp-solver/solver/matrix"
 )
 
 func TestSolve(t *testing.T) {
 	type args struct {
-		distanceMatrix [][]int
+		distanceMatrix matrix.Matrix
 	}
 	tests := []struct {
 		name    string
@@ -26,7 +28,7 @@ func TestSolve(t *testing.T) {
 		{
 			"non square",
 			args{
-				[][]int{
+				matrix.Matrix{
 					{0, 1},
 					{0, 1},
 					{0, 1},
@@ -38,7 +40,7 @@ func TestSolve(t *testing.T) {
 		{
 			"non square 2",
 			args{
-				[][]int{
+				matrix.Matrix{
 					{0, 1},
 					{0},
 				},
@@ -49,7 +51,7 @@ func TestSolve(t *testing.T) {
 		{
 			"problem - 2",
 			args{
-				[][]int{
+				matrix.Matrix{
 					{0, 1, 9},
 					{9, 0, 1},
 					{1, 9, 0},
