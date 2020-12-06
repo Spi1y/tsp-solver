@@ -77,6 +77,10 @@ func (m Matrix) Normalize() int {
 			return -1
 		}
 
+		if min == 0 {
+			continue
+		}
+
 		// And now, we substract it
 		for j := 0; j < size; j++ {
 			val = m[i][j]
