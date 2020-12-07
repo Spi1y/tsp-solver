@@ -219,17 +219,17 @@ func TestMatrix_CutNode(t *testing.T) {
 				lastNode: false,
 			},
 			ConvertToMatrix([][]int{
-				{0, 0, 0},
-				{0, 0, 1},
-				{3, 0, 1},
+				{-1, -1, -1},
+				{-1, -1, 1},
+				{3, -1, 1},
 			}),
 		},
 		{
 			"3*3, last node",
 			ConvertToMatrix([][]int{
-				{0, 0, 0},
-				{0, 0, 1},
-				{3, 0, 1},
+				{-1, -1, -1},
+				{-1, -1, 1},
+				{3, -1, 1},
 			}),
 			args{
 				source:   1,
@@ -237,15 +237,19 @@ func TestMatrix_CutNode(t *testing.T) {
 				lastNode: true,
 			},
 			ConvertToMatrix([][]int{
-				{0, 0, 0},
-				{0, 0, 0},
-				{3, 0, 0},
+				{-1, -1, -1},
+				{-1, -1, -1},
+				{3, -1, -1},
 			}),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.m.CutNode(tt.args.source, tt.args.dest, tt.args.lastNode)
+
+			if !reflect.DeepEqual(tt.mOut, tt.m) {
+				t.Errorf("After Matrix.CutNode() m became %v, should be %v", tt.m, tt.mOut)
+			}
 		})
 	}
 }

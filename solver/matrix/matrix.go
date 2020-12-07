@@ -15,12 +15,6 @@ func ConvertToMatrix(slice [][]int) Matrix {
 	for i, row := range slice {
 		matrix[i] = backingArray[i*size : (i+1)*size]
 		copy(matrix[i], row)
-
-		for valind, val := range matrix[i] {
-			if val < 0 {
-				matrix[i][valind] = 0
-			}
-		}
 	}
 
 	return matrix
