@@ -22,17 +22,6 @@ func Test_convertToMatrix(t *testing.T) {
 			Matrix{},
 		},
 		{
-			"Negative",
-			args{
-				slice: [][]int{
-					{-1},
-				},
-			},
-			Matrix{
-				{0},
-			},
-		},
-		{
 			"Normal - 3*3",
 			args{
 				slice: [][]int{
