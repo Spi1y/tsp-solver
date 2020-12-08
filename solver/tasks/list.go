@@ -141,10 +141,27 @@ func (l *List) Clear() {
 	l.Last = nil
 }
 
+// IsEmpty checks if there is no records in the list.
+func (l *List) IsEmpty() bool {
+	if l.First == nil {
+		return true
+	}
+
+	return false
+}
+
 // GetFirst gets the task from the first record in the list and
 // removes it from the list.
-func (l *List) GetFirst(solution []int, distance int) {
-	// TODO - Implement GetFirst
+// If list is empty, it returns nil.
+func (l *List) GetFirst() *Task {
+	if l.First == nil {
+		return nil
+	}
+
+	record := l.First
+	l.First = l.First.next
+
+	return record.Task
 }
 
 // String implements the Stringer interface

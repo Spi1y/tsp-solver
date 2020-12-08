@@ -176,3 +176,78 @@ func TestList_TrimTail(t *testing.T) {
 		})
 	}
 }
+
+func TestList_IsEmpty(t *testing.T) {
+	emptyList := &List{}
+	notEmptyList := &List{}
+	notEmptyList.rawInsert(&Task{}, 0)
+
+	tests := []struct {
+		name string
+		l    *List
+		want bool
+	}{
+		{
+			"Empty",
+			emptyList,
+			true,
+		},
+		{
+			"Not empty",
+			notEmptyList,
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.l.IsEmpty(); got != tt.want {
+				assert.Equal(t, tt.want, got)
+			}
+		})
+	}
+}
+
+func TestList_GetFirst(t *testing.T) {
+	list := &List{}
+	tasks := []*Task{
+		{ActualDistance: 10},
+		{ActualDistance: 5},
+		{ActualDistance: 1},
+	}
+	list.Insert(tasks)
+
+	tests := []struct {
+		name      string
+		want      *Task
+		wantEmpty bool
+	}{
+		{
+			"Get 10",
+			tasks[0],
+			false,
+		},
+		{
+			"Get 5",
+			tasks[1],
+			false,
+		},
+		{
+			"Get 1",
+			tasks[2],
+			true,
+		},
+		{
+			"Get nil",
+			nil,
+			true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := list.GetFirst()
+			assert.Same(t, tt.want, got)
+			assert.Equal(t, tt.wantEmpty, list.IsEmpty())
+		})
+	}
+}
