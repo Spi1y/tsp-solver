@@ -35,28 +35,116 @@ type List struct {
 // Insert inserts new tasks into the list
 // Their potential is calculated and used to determine the position
 // of the inserts
-func (l *List) Insert(tasks ...*Task) {
+func (l *List) Insert(tasks []*Task) {
+	// A quick path for an empty insertion
+	if len(tasks) == 0 {
+		return
+	}
+
+	// Initialize insertion queue if necessary
 	if l.insertionQueue == nil {
 		l.insertionQueue = &List{}
 	}
 
-	// var potential int
-	// for _, task := range tasks {
-	// 	potential = task.ActualDistance + task.ProjectedDistance
+	// Populate insertion queue and defer clearing
+	for _, task := range tasks {
+		l.insertionQueue.rawInsert(task, task.ActualDistance+task.ProjectedDistance)
+	}
+	defer l.insertionQueue.Clear()
 
-	// }
+	// A quick path for an empty list
+	if l.First == nil {
+		l.First = l.insertionQueue.First
+		l.Last = l.insertionQueue.Last
+
+		return
+	}
+
+	insertion := l.insertionQueue.First
+
+	// Check if new insert have to go in the head of the list
+	if l.First.Potential <= insertion.Potential {
+		// Extracrt the record from the insertion queue
+		newRecord := insertion
+		insertion = insertion.next
+
+		// Install it as a new head
+		newRecord.next = l.First
+		l.First.prev = newRecord
+		l.First = newRecord
+	}
+
+	// Iterate over list records, inserting as needed
+	for listRecord := l.First; (listRecord != nil) && (insertion != nil); listRecord = listRecord.next {
+		// Iterate over remaining insertion queue, if there is suitable insertions to go before the listRecord
+		for (insertion != nil) && (listRecord.Potential <= insertion.Potential) {
+			// Extracrt the record from the insertion queue
+			newRecord := insertion
+			insertion = insertion.next
+
+			// Install it before the current list record
+			listRecord.prev.next = newRecord
+			newRecord.prev = listRecord.prev
+
+			newRecord.next = listRecord
+			listRecord.prev = newRecord
+		}
+	}
+
+	// If some insertion records remain, they should go to the end
+	if insertion != nil {
+		insertion.prev = l.Last
+		l.Last.next = insertion
+
+		l.Last = l.insertionQueue.Last
+	}
+}
+
+// TrimTail trims records from the tail of the list with potential smaller
+// than fiven argument
+func (l *List) TrimTail(potential int) {
+	// A quick path for an empty list
+	if l.First == nil {
+		return
+	}
+
+	// A quick path for a tail not suitable for trimming
+	if l.Last.Potential > potential {
+		return
+	}
+
+	// A quick path for a full list trim
+	if l.First.Potential <= potential {
+		l.Clear()
+		return
+	}
+
+	for checked := l.Last; checked != nil; checked = checked.prev {
+		if checked.Potential > potential {
+			l.Last = checked
+			l.Last.next = nil
+			break
+		}
+	}
 }
 
 // SolutionFound notifies the list of the finding of the new solution
 // The list then checks if it`s better than the current one. If necessary,
 // it will update it and cut obsolete solutions accordingly.
 func (l *List) SolutionFound(solution []int, distance int) {
-
+	// TODO - Implement SolutionFound
 }
 
-// Clear clears the list of all entries
+// Clear clears the list of all records
 func (l *List) Clear() {
+	l.First = nil
+	l.Last = nil
+}
 
+// GetFirst gets the task from the first record in the list and
+// removes it from the list.
+func (l *List) GetFirst(solution []int, distance int) {
+	// TODO - Implement GetFirst
 }
 
 // String implements the Stringer interface
@@ -80,6 +168,7 @@ func (l *List) rawInsert(task *Task, potential int) {
 		Potential: potential,
 	}
 
+	// A quick path for an empty list
 	if l.First == nil {
 		l.First = record
 		l.Last = record
@@ -87,6 +176,7 @@ func (l *List) rawInsert(task *Task, potential int) {
 		return
 	}
 
+	// Check if new insert have to go in the head of the list
 	if l.First.Potential <= record.Potential {
 		record.next = l.First
 		l.First.prev = record
@@ -95,6 +185,7 @@ func (l *List) rawInsert(task *Task, potential int) {
 		return
 	}
 
+	// Iterate over list records, seeking the suitable insert position
 	for checked := l.First; checked != nil; checked = checked.next {
 		if checked.Potential <= record.Potential {
 			checked.prev.next = record
@@ -111,4 +202,5 @@ func (l *List) rawInsert(task *Task, potential int) {
 	// available potential and have to insert in the end
 	record.prev = l.Last
 	l.Last.next = record
+	l.Last = record
 }
