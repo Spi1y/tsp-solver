@@ -7,55 +7,43 @@ import (
 )
 
 func TestList_rawInsert(t *testing.T) {
+	list := &List{}
+	task := &Task{}
+
 	tests := []struct {
 		name      string
 		potential int
 		expected  string
 	}{
 		{
-			"Insert into empty list",
-			5,
+			"Into empty list", 5,
 			"tasks.List: 5",
 		},
 		{
-			"Insert to the end",
-			1,
+			"To the end", 1,
 			"tasks.List: 5 1",
 		},
 		{
-			"Duplicate end",
-			1,
+			"Duplicate end", 1,
 			"tasks.List: 5 1 1",
 		},
 		{
-			"Insert to the front",
-			10,
+			"To the front", 10,
 			"tasks.List: 10 5 1 1",
 		},
 		{
-			"Duplicate front",
-			10,
+			"Duplicate front", 10,
 			"tasks.List: 10 10 5 1 1",
 		},
 		{
-			"Insert into the middle",
-			7,
+			"Into the middle", 7,
 			"tasks.List: 10 10 7 5 1 1",
 		},
 		{
-			"Duplicate middle",
-			5,
+			"Duplicate middle", 5,
 			"tasks.List: 10 10 7 5 5 1 1",
 		},
-		{
-			"Second duplicate middle",
-			5,
-			"tasks.List: 10 10 7 5 5 5 1 1",
-		},
 	}
-
-	list := &List{}
-	task := &Task{}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -72,43 +60,35 @@ func TestList_Insert(t *testing.T) {
 		expected   string
 	}{
 		{
-			"Insert into empty list",
-			[]int{5},
+			"Into empty list", []int{5},
 			"tasks.List: 5",
 		},
 		{
-			"Empty insert",
-			[]int{},
+			"Empty insert", []int{},
 			"tasks.List: 5",
 		},
 		{
-			"Insert to the end",
-			[]int{1},
+			"To the end", []int{1},
 			"tasks.List: 5 1",
 		},
 		{
-			"Insert to the front",
-			[]int{10},
+			"To the front", []int{10},
 			"tasks.List: 10 5 1",
 		},
 		{
-			"Insert into the middle",
-			[]int{7},
+			"Into the middle", []int{7},
 			"tasks.List: 10 7 5 1",
 		},
 		{
-			"Insert duplicate",
-			[]int{5},
+			"Duplicate", []int{5},
 			"tasks.List: 10 7 5 5 1",
 		},
 		{
-			"Bulk insert sorted",
-			[]int{12, 6, 5, 5, 5, 4, 1, 0, 0},
+			"Bulk sorted", []int{12, 6, 5, 5, 5, 4, 1, 0, 0},
 			"tasks.List: 12 10 7 6 5 5 5 5 5 4 1 1 0 0",
 		},
 		{
-			"Bulk insert mixed",
-			[]int{3, 8, 50, 15, 7, 6, 7, 0},
+			"Bulk mixed", []int{3, 8, 50, 15, 7, 6, 7, 0},
 			"tasks.List: 50 15 12 10 8 7 7 7 6 6 5 5 5 5 5 4 3 1 1 0 0 0",
 		},
 	}
@@ -129,45 +109,40 @@ func TestList_Insert(t *testing.T) {
 }
 
 func TestList_TrimTail(t *testing.T) {
+	list := &List{}
+	initlist := []int{50, 15, 12, 10, 8, 7, 7, 7, 6, 6, 5, 5, 5, 5, 5, 4, 3, 1, 1, 0, 0, 0}
+	args := make([]*Task, len(initlist))
+	for i, potential := range initlist {
+		args[i] = &Task{ActualDistance: potential}
+	}
+	list.Insert(args)
+
 	tests := []struct {
 		name      string
 		potential int
 		expected  string
 	}{
 		{
-			"Empty trim",
-			-1,
+			"No trim", -1,
 			"tasks.List: 50 15 12 10 8 7 7 7 6 6 5 5 5 5 5 4 3 1 1 0 0 0",
 		},
 		{
-			"Simple trim",
-			0,
+			"Simple", 0,
 			"tasks.List: 50 15 12 10 8 7 7 7 6 6 5 5 5 5 5 4 3 1 1",
 		},
 		{
-			"Simple trim - 2",
-			5,
+			"Simple-2", 5,
 			"tasks.List: 50 15 12 10 8 7 7 7 6 6",
 		},
 		{
-			"Full trim",
-			100,
+			"Full", 100,
 			"tasks.List:",
 		},
 		{
-			"Trim on empty list",
-			100,
+			"On empty list", 100,
 			"tasks.List:",
 		},
 	}
-
-	list := &List{}
-	initlist := []int{50, 15, 12, 10, 8, 7, 7, 7, 6, 6, 5, 5, 5, 5, 5, 4, 3, 1, 1, 0, 0, 0}
-	args := make([]*Task, 0)
-	for _, potential := range initlist {
-		args = append(args, &Task{ActualDistance: potential})
-	}
-	list.Insert(args)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -187,16 +162,8 @@ func TestList_IsEmpty(t *testing.T) {
 		l    *List
 		want bool
 	}{
-		{
-			"Empty",
-			emptyList,
-			true,
-		},
-		{
-			"Not empty",
-			notEmptyList,
-			false,
-		},
+		{"Empty", emptyList, true},
+		{"Not empty", notEmptyList, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -221,26 +188,10 @@ func TestList_GetFirst(t *testing.T) {
 		want      *Task
 		wantEmpty bool
 	}{
-		{
-			"Get 10",
-			tasks[0],
-			false,
-		},
-		{
-			"Get 5",
-			tasks[1],
-			false,
-		},
-		{
-			"Get 1",
-			tasks[2],
-			true,
-		},
-		{
-			"Get nil",
-			nil,
-			true,
-		},
+		{"[0]", tasks[0], false},
+		{"[1]", tasks[1], false},
+		{"[2]", tasks[2], true},
+		{"nil", nil, true},
 	}
 
 	for _, tt := range tests {
