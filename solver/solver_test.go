@@ -107,6 +107,7 @@ func TestSolver_solveTask(t *testing.T) {
 				},
 			},
 		},
+		// TODO - Implement further tests
 		// {
 		// 	"Middle task",
 		// 	0,
