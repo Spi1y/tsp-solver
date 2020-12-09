@@ -99,7 +99,7 @@ func TestList_Insert(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			args = args[:0]
 			for _, potential := range tt.potentials {
-				args = append(args, &Task{ActualDistance: potential})
+				args = append(args, &Task{Distance: potential})
 			}
 
 			list.Insert(args)
@@ -113,7 +113,7 @@ func TestList_TrimTail(t *testing.T) {
 	initlist := []int{50, 15, 12, 10, 8, 7, 7, 7, 6, 6, 5, 5, 5, 5, 5, 4, 3, 1, 1, 0, 0, 0}
 	args := make([]*Task, len(initlist))
 	for i, potential := range initlist {
-		args[i] = &Task{ActualDistance: potential}
+		args[i] = &Task{Distance: potential}
 	}
 	list.Insert(args)
 
@@ -177,9 +177,9 @@ func TestList_IsEmpty(t *testing.T) {
 func TestList_GetFirst(t *testing.T) {
 	list := &List{}
 	tasks := []*Task{
-		{ActualDistance: 10},
-		{ActualDistance: 5},
-		{ActualDistance: 1},
+		{Distance: 10},
+		{Distance: 5},
+		{Distance: 1},
 	}
 	list.Insert(tasks)
 

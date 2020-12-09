@@ -48,7 +48,7 @@ func (l *List) Insert(tasks []*Task) {
 
 	// Populate insertion queue and defer clearing
 	for _, task := range tasks {
-		l.insertionQueue.rawInsert(task, task.ActualDistance+task.ProjectedDistance)
+		l.insertionQueue.rawInsert(task, task.Distance)
 	}
 	defer l.insertionQueue.Clear()
 
