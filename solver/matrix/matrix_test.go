@@ -1,7 +1,6 @@
 package matrix
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -71,9 +70,8 @@ func Test_convertToMatrix(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ConvertToMatrix(tt.args.slice); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ConvertToMatrix() = %v, want %v", got, tt.want)
-			}
+			got := ConvertToMatrix(tt.args.slice)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -106,14 +104,10 @@ func Test_Matrix_copy(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.m.Copy()
 
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Matrix.copy() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, tt.want, got)
 
 			if len(got) > 0 {
-				if &got[0] == &tt.m[0] {
-					t.Errorf("Matrix.copy() should not be a ref to an argument")
-				}
+				assert.NotSame(t, &tt.m[0], &got[0])
 			}
 		})
 	}
@@ -164,13 +158,8 @@ func TestMatrix_Normalize(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.m.Normalize()
-			if got != tt.want {
-				t.Errorf("Matrix.Normalize() = %v, want %v", got, tt.want)
-			}
-
-			if !reflect.DeepEqual(tt.mOut, tt.m) {
-				t.Errorf("After Matrix.Normalize() m became %v, should be %v", tt.m, tt.mOut)
-			}
+			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.mOut, tt.m)
 		})
 	}
 }
@@ -238,9 +227,7 @@ func TestMatrix_CutNode(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.m.CutNode(tt.args.source, tt.args.dest, tt.args.lastNode)
 
-			if !reflect.DeepEqual(tt.mOut, tt.m) {
-				t.Errorf("After Matrix.CutNode() m became %v, should be %v", tt.m, tt.mOut)
-			}
+			assert.Equal(t, tt.mOut, tt.m)
 		})
 	}
 }
