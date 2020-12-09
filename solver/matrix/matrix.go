@@ -85,7 +85,7 @@ func (m Matrix) Normalize() int {
 		}
 
 		if min == -1 {
-			return -1
+			continue
 		}
 
 		if min == 0 {
@@ -129,7 +129,11 @@ func (m Matrix) Normalize() int {
 		}
 
 		if min == -1 {
-			return -1
+			continue
+		}
+
+		if min == 0 {
+			continue
 		}
 
 		// And now, we substract it
