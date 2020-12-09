@@ -21,12 +21,6 @@ type List struct {
 	First *ListRecord
 	Last  *ListRecord
 
-	// CurrentBestSolution is a current best found solution (if any)
-	CurrentBestSolution []int
-	// Distance of the CurrentBestSolution.
-	// Used to delete obsolete solution paths from the end of the list
-	CurrentBestDistance int
-
 	// insertionQueue used for the optimization of bulk tasks insertion
 	// See List.Insert(tasks)
 	insertionQueue *List
@@ -126,13 +120,6 @@ func (l *List) TrimTail(potential int) {
 			break
 		}
 	}
-}
-
-// SolutionFound notifies the list of the finding of the new solution
-// The list then checks if it`s better than the current one. If necessary,
-// it will update it and cut obsolete solutions accordingly.
-func (l *List) SolutionFound(solution []int, distance int) {
-	// TODO - Implement SolutionFound
 }
 
 // Clear clears the list of all records
