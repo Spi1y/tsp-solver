@@ -1,5 +1,7 @@
 package matrix
 
+import "errors"
+
 // Matrix is a square matrix.
 // It`s underlying [][]int slice is guaranteed to be sliced from one
 // linear backing array, which allows some copying optimizations.
@@ -20,7 +22,7 @@ func ConvertToMatrix(slice [][]int) Matrix {
 	return matrix
 }
 
-// Copy copies matrix to another with some optimizations.
+// Copy copies matrix to a new one with some optimizations.
 func (m Matrix) Copy() Matrix {
 	size := len(m)
 
@@ -36,6 +38,21 @@ func (m Matrix) Copy() Matrix {
 	}
 
 	return matrix
+}
+
+// LoadFrom copies matrix data from another matrix
+func (m Matrix) LoadFrom(source Matrix) error {
+	size := len(m)
+
+	if len(m) != len(source) {
+		return errors.New("Matrix size mismatch")
+	}
+
+	if size != 0 {
+		copy(m[0][:cap(m[0])], source[0][:cap(m[0])])
+	}
+
+	return nil
 }
 
 // Normalize calculates minimal value in each row separately.

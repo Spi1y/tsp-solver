@@ -3,6 +3,8 @@ package matrix
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_convertToMatrix(t *testing.T) {
@@ -238,6 +240,74 @@ func TestMatrix_CutNode(t *testing.T) {
 
 			if !reflect.DeepEqual(tt.mOut, tt.m) {
 				t.Errorf("After Matrix.CutNode() m became %v, should be %v", tt.m, tt.mOut)
+			}
+		})
+	}
+}
+
+func TestMatrix_LoadFrom(t *testing.T) {
+	tests := []struct {
+		name    string
+		m       Matrix
+		source  Matrix
+		mOut    Matrix
+		wantErr bool
+	}{
+		{
+			"empty",
+			ConvertToMatrix(nil),
+			ConvertToMatrix(nil),
+			ConvertToMatrix(nil),
+			false,
+		},
+		{
+			"3*3",
+			ConvertToMatrix([][]int{
+				{0, 0, 0},
+				{0, 0, 0},
+				{0, 0, 0},
+			}),
+			ConvertToMatrix([][]int{
+				{1, 2, 3},
+				{2, 3, 1},
+				{3, 2, 1},
+			}),
+			ConvertToMatrix([][]int{
+				{1, 2, 3},
+				{2, 3, 1},
+				{3, 2, 1},
+			}),
+			false,
+		},
+		{
+			"Size mismatch",
+			ConvertToMatrix([][]int{
+				{1, 2, 3},
+				{2, 3, 1},
+				{3, 2, 1},
+			}),
+			ConvertToMatrix([][]int{
+				{1, 2, 3, 4},
+				{2, 3, 1, 4},
+				{3, 2, 1, 4},
+				{3, 2, 1, 4},
+			}),
+			ConvertToMatrix([][]int{
+				{1, 2, 3},
+				{2, 3, 1},
+				{3, 2, 1},
+			}),
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.m.LoadFrom(tt.source)
+			assert.Equal(t, tt.mOut, tt.m)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
 			}
 		})
 	}
