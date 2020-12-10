@@ -110,7 +110,7 @@ func TestList_Insert(t *testing.T) {
 
 func TestList_TrimTail(t *testing.T) {
 	list := &List{}
-	initlist := []int{50, 15, 12, 10, 8, 7, 7, 7, 6, 6, 5, 5, 5, 5, 5, 4, 3, 1, 1, 0, 0, 0}
+	initlist := []int{3, 4, 5, 5, 5, 5, 5, 6, 6, 7, 7, 7, 8, 10, 12, 12, 15, 50, 50}
 	args := make([]*Task, len(initlist))
 	for i, potential := range initlist {
 		args[i] = &Task{Distance: potential}
@@ -123,23 +123,23 @@ func TestList_TrimTail(t *testing.T) {
 		expected  string
 	}{
 		{
-			"No trim", -1,
-			"tasks.List: 50 15 12 10 8 7 7 7 6 6 5 5 5 5 5 4 3 1 1 0 0 0",
+			"No trim", 100,
+			"tasks.List: 3 4 5 5 5 5 5 6 6 7 7 7 8 10 12 12 15 50 50",
 		},
 		{
-			"Simple", 0,
-			"tasks.List: 50 15 12 10 8 7 7 7 6 6 5 5 5 5 5 4 3 1 1",
+			"Simple", 15,
+			"tasks.List: 3 4 5 5 5 5 5 6 6 7 7 7 8 10 12 12",
 		},
 		{
 			"Simple-2", 5,
-			"tasks.List: 50 15 12 10 8 7 7 7 6 6",
+			"tasks.List: 3 4",
 		},
 		{
-			"Full", 100,
+			"Full", 2,
 			"tasks.List:",
 		},
 		{
-			"On empty list", 100,
+			"On empty list", 1,
 			"tasks.List:",
 		},
 	}
@@ -177,9 +177,9 @@ func TestList_IsEmpty(t *testing.T) {
 func TestList_GetFirst(t *testing.T) {
 	list := &List{}
 	tasks := []*Task{
-		{Distance: 10},
-		{Distance: 5},
 		{Distance: 1},
+		{Distance: 5},
+		{Distance: 10},
 	}
 	list.Insert(tasks)
 
