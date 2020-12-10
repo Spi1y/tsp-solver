@@ -14,6 +14,8 @@ type Solver struct {
 
 	bestSolution         []int
 	bestSolutionDistance int
+
+	tasks *tasks.List
 }
 
 // Solve solves the TSP problem with a given distance matrix.
@@ -33,15 +35,15 @@ func (s *Solver) Solve() ([]int, int, error) {
 		Distance:       basePathCost,
 		DistanceMatrix: rootMatrix,
 	}
-	taskList := &tasks.List{}
+	s.tasks = &tasks.List{}
 
 	newTasks := s.solveTask(rootTask)
-	taskList.Insert(newTasks)
+	s.tasks.Insert(newTasks)
 
-	for !taskList.IsEmpty() {
-		task := taskList.GetFirst()
+	for !s.tasks.IsEmpty() {
+		task := s.tasks.GetFirst()
 		newTasks := s.solveTask(task)
-		taskList.Insert(newTasks)
+		s.tasks.Insert(newTasks)
 	}
 
 	return s.bestSolution, s.bestSolutionDistance, nil
@@ -55,7 +57,7 @@ func (s *Solver) newSolutionFound(path []int, distance int) {
 	s.bestSolution = path
 	s.bestSolutionDistance = distance
 
-	// TODO - trim tasks list
+	s.tasks.TrimTail(distance)
 }
 
 func (s *Solver) solveTask(task *tasks.Task) []*tasks.Task {
