@@ -17,31 +17,45 @@ type Solver struct {
 }
 
 // Solve solves the TSP problem with a given distance matrix.
-func (s *Solver) Solve() ([]int, error) {
+func (s *Solver) Solve() ([]int, int, error) {
 	size := len(s.DistanceMatrix)
 
 	if size == 0 {
-		return nil, errors.New("empty matrix")
+		return nil, 0, errors.New("empty matrix")
 	}
 
-	// Mark 0-0 path as processed to correctly detect it in the solveTask
-	// It looks ugly, but it is necessary due to the specifications of the
-	// task - circular path with start and end in 0. So 0 node is special and
-	// we treat it as such
-	for i := range s.DistanceMatrix {
-		s.DistanceMatrix[i][i] = -1
+	rootMatrix := s.DistanceMatrix.Copy()
+	basePathCost := rootMatrix.Normalize()
+	// Mark 0-0 path as processed to correctly skip it in firther calculations
+	rootMatrix[0][0] = -1
+	rootTask := &tasks.Task{
+		Path:           []int{0},
+		Distance:       basePathCost,
+		DistanceMatrix: rootMatrix,
+	}
+	taskList := &tasks.List{}
+
+	newTasks := s.solveTask(rootTask)
+	taskList.Insert(newTasks)
+
+	for !taskList.IsEmpty() {
+		task := taskList.GetFirst()
+		newTasks := s.solveTask(task)
+		taskList.Insert(newTasks)
 	}
 
-	//rotNode := solutionNode{
-	// _ = solutionNode{
-	// 	parent:        nil,
-	// 	point:         0,
-	// 	projectedCost: 0,
-	// 	actualCost:    0,
-	// 	matrix:        nil,
-	// }
+	return s.bestSolution, s.bestSolutionDistance, nil
+}
 
-	return nil, nil
+func (s *Solver) newSolutionFound(path []int, distance int) {
+	if (s.bestSolutionDistance != 0) && (distance >= s.bestSolutionDistance) {
+		return
+	}
+
+	s.bestSolution = path
+	s.bestSolutionDistance = distance
+
+	// TODO - trim tasks list
 }
 
 func (s *Solver) solveTask(task *tasks.Task) []*tasks.Task {
@@ -63,7 +77,7 @@ func (s *Solver) solveTask(task *tasks.Task) []*tasks.Task {
 	newTasks := make([]*tasks.Task, 0, nodesTotal-nodesTraversed)
 	for nextNode := range m {
 		// Skip already visited nodes
-		if m[0][nextNode] == -1 {
+		if m[nextNode][0] == -1 {
 			continue
 		}
 
@@ -86,10 +100,7 @@ func (s *Solver) solveTask(task *tasks.Task) []*tasks.Task {
 		if closingNode {
 			// The path is finished and it`s better than the current best one
 			// Update the solver state
-			s.bestSolution = newPath
-			s.bestSolutionDistance = fullDistance
-
-			// There won`t be new tasks
+			s.newSolutionFound(newPath, fullDistance)
 			return nil
 		}
 
