@@ -103,7 +103,7 @@ func (l *List) TrimTail(potential int) {
 	}
 
 	// A quick path for a tail not suitable for trimming
-	if l.Last.Potential > potential {
+	if l.Last.Potential < potential {
 		return
 	}
 
@@ -114,7 +114,7 @@ func (l *List) TrimTail(potential int) {
 	}
 
 	for checked := l.Last; checked != nil; checked = checked.prev {
-		if checked.Potential > potential {
+		if checked.Potential < potential {
 			l.Last = checked
 			l.Last.next = nil
 			break
