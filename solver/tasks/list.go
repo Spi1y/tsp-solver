@@ -56,9 +56,9 @@ func (l *List) Insert(tasks []*Task) {
 
 	insertion := l.insertionQueue.First
 
-	// Check if new insert have to go in the head of the list
-	if l.First.Potential <= insertion.Potential {
-		// Extracrt the record from the insertion queue
+	// Check if new inserts have to go in the head of the list
+	for (insertion != nil) && (l.First.Potential >= insertion.Potential) {
+		// Extract the record from the insertion queue
 		newRecord := insertion
 		insertion = insertion.next
 
@@ -71,8 +71,8 @@ func (l *List) Insert(tasks []*Task) {
 	// Iterate over list records, inserting as needed
 	for listRecord := l.First; (listRecord != nil) && (insertion != nil); listRecord = listRecord.next {
 		// Iterate over remaining insertion queue, if there is suitable insertions to go before the listRecord
-		for (insertion != nil) && (listRecord.Potential <= insertion.Potential) {
-			// Extracrt the record from the insertion queue
+		for (insertion != nil) && (listRecord.Potential >= insertion.Potential) {
+			// Extract the record from the insertion queue
 			newRecord := insertion
 			insertion = insertion.next
 
@@ -108,7 +108,7 @@ func (l *List) TrimTail(potential int) {
 	}
 
 	// A quick path for a full list trim
-	if l.First.Potential <= potential {
+	if l.First.Potential >= potential {
 		l.Clear()
 		return
 	}
@@ -181,7 +181,7 @@ func (l *List) rawInsert(task *Task, potential int) {
 	}
 
 	// Check if new insert have to go in the head of the list
-	if l.First.Potential <= record.Potential {
+	if l.First.Potential >= record.Potential {
 		record.next = l.First
 		l.First.prev = record
 		l.First = record
@@ -191,7 +191,7 @@ func (l *List) rawInsert(task *Task, potential int) {
 
 	// Iterate over list records, seeking the suitable insert position
 	for checked := l.First; checked != nil; checked = checked.next {
-		if checked.Potential <= record.Potential {
+		if checked.Potential >= record.Potential {
 			checked.prev.next = record
 			record.prev = checked.prev
 

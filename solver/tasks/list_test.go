@@ -21,27 +21,27 @@ func TestList_rawInsert(t *testing.T) {
 		},
 		{
 			"To the end", 1,
-			"tasks.List: 5 1",
+			"tasks.List: 1 5",
 		},
 		{
 			"Duplicate end", 1,
-			"tasks.List: 5 1 1",
+			"tasks.List: 1 1 5",
 		},
 		{
 			"To the front", 10,
-			"tasks.List: 10 5 1 1",
+			"tasks.List: 1 1 5 10",
 		},
 		{
 			"Duplicate front", 10,
-			"tasks.List: 10 10 5 1 1",
+			"tasks.List: 1 1 5 10 10",
 		},
 		{
 			"Into the middle", 7,
-			"tasks.List: 10 10 7 5 1 1",
+			"tasks.List: 1 1 5 7 10 10",
 		},
 		{
 			"Duplicate middle", 5,
-			"tasks.List: 10 10 7 5 5 1 1",
+			"tasks.List: 1 1 5 5 7 10 10",
 		},
 	}
 
@@ -69,27 +69,27 @@ func TestList_Insert(t *testing.T) {
 		},
 		{
 			"To the end", []int{1},
-			"tasks.List: 5 1",
+			"tasks.List: 1 5",
 		},
 		{
 			"To the front", []int{10},
-			"tasks.List: 10 5 1",
+			"tasks.List: 1 5 10",
 		},
 		{
 			"Into the middle", []int{7},
-			"tasks.List: 10 7 5 1",
+			"tasks.List: 1 5 7 10",
 		},
 		{
 			"Duplicate", []int{5},
-			"tasks.List: 10 7 5 5 1",
+			"tasks.List: 1 5 5 7 10",
 		},
 		{
-			"Bulk sorted", []int{12, 6, 5, 5, 5, 4, 1, 0, 0},
-			"tasks.List: 12 10 7 6 5 5 5 5 5 4 1 1 0 0",
+			"Bulk sorted", []int{12, 12, 6, 5, 5, 5, 4, 1, 0, 0},
+			"tasks.List: 0 0 1 1 4 5 5 5 5 5 6 7 10 12 12",
 		},
 		{
-			"Bulk mixed", []int{3, 8, 50, 15, 7, 6, 7, 0},
-			"tasks.List: 50 15 12 10 8 7 7 7 6 6 5 5 5 5 5 4 3 1 1 0 0 0",
+			"Bulk mixed", []int{3, 8, 50, 50, 15, 0, 7, 6, 7, 0},
+			"tasks.List: 0 0 0 0 1 1 3 4 5 5 5 5 5 6 6 7 7 7 8 10 12 12 15 50 50",
 		},
 	}
 	list := &List{}
