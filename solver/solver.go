@@ -26,6 +26,9 @@ func (s *Solver) Solve() ([]int, int, error) {
 		return nil, 0, errors.New("empty matrix")
 	}
 
+	s.bestSolution = []int{}
+	s.bestSolutionDistance = 0
+
 	rootMatrix := s.DistanceMatrix.Copy()
 	basePathCost := rootMatrix.Normalize()
 	// Mark 0-0 path as processed to correctly skip it in firther calculations
