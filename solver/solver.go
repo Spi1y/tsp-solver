@@ -44,7 +44,7 @@ func (s *Solver) Solve() ([]int, int, error) {
 	s.tasks.Insert(newTasks)
 
 	for !s.tasks.IsEmpty() {
-		task := s.tasks.GetFirst()
+		task := s.tasks.Pop()
 		newTasks := s.solveTask(task)
 		s.tasks.Insert(newTasks)
 	}
