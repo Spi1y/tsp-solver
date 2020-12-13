@@ -102,7 +102,7 @@ func TestList_Insert(t *testing.T) {
 				args = append(args, &Task{Distance: potential})
 			}
 
-			list.Insert(args)
+			list.BulkPush(args)
 			assert.Equal(t, tt.expected, list.String())
 		})
 	}
@@ -115,7 +115,7 @@ func TestList_TrimTail(t *testing.T) {
 	for i, potential := range initlist {
 		args[i] = &Task{Distance: potential}
 	}
-	list.Insert(args)
+	list.BulkPush(args)
 
 	tests := []struct {
 		name      string
@@ -181,7 +181,7 @@ func TestList_GetFirst(t *testing.T) {
 		{Distance: 5},
 		{Distance: 10},
 	}
-	list.Insert(tasks)
+	list.BulkPush(tasks)
 
 	tests := []struct {
 		name      string
@@ -196,7 +196,7 @@ func TestList_GetFirst(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := list.GetFirst()
+			got := list.Pop()
 			assert.Same(t, tt.want, got)
 			assert.Equal(t, tt.wantEmpty, list.IsEmpty())
 		})

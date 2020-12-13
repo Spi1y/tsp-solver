@@ -26,10 +26,10 @@ type List struct {
 	insertionQueue *List
 }
 
-// Insert inserts new tasks into the list
+// BulkPush inserts new tasks into the list
 // Their potential is calculated and used to determine the position
 // of the inserts
-func (l *List) Insert(tasks []*Task) {
+func (l *List) BulkPush(tasks []*Task) {
 	// A quick path for an empty insertion
 	if len(tasks) == 0 {
 		return
@@ -137,10 +137,10 @@ func (l *List) IsEmpty() bool {
 	return false
 }
 
-// GetFirst gets the task from the first record in the list and
+// Pop gets the task from the first record in the list and
 // removes it from the list.
 // If list is empty, it returns nil.
-func (l *List) GetFirst() *Task {
+func (l *List) Pop() *Task {
 	if l.First == nil {
 		return nil
 	}
