@@ -44,7 +44,7 @@ func (l *List) BulkPush(tasks []*Task) {
 	for _, task := range tasks {
 		l.insertionQueue.rawInsert(task, task.Distance)
 	}
-	defer l.insertionQueue.Clear()
+	defer l.insertionQueue.clear()
 
 	// A quick path for an empty list
 	if l.First == nil {
@@ -109,7 +109,7 @@ func (l *List) TrimTail(potential int) {
 
 	// A quick path for a full list trim
 	if l.First.Potential >= potential {
-		l.Clear()
+		l.clear()
 		return
 	}
 
@@ -122,8 +122,8 @@ func (l *List) TrimTail(potential int) {
 	}
 }
 
-// Clear clears the list of all records
-func (l *List) Clear() {
+// clear clears the list of all records
+func (l *List) clear() {
 	l.First = nil
 	l.Last = nil
 }
