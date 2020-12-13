@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/Spi1y/tsp-solver/solver/matrix"
+	"github.com/Spi1y/tsp-solver/solver/tasks"
 )
 
 func baseMatrix17() [][]int {
@@ -36,7 +37,7 @@ func runBenchamrk(size int, b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		s := &Solver{}
 		s.DistanceMatrix = sizedMatrix
-		s.Solve()
+		s.Solve(tasks.QueueLinkedList)
 	}
 }
 

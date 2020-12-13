@@ -16,7 +16,7 @@ type ListRecord struct {
 	Potential int
 }
 
-// List is a double-linked priority list of tasks
+// List is a double-linked sorted list of tasks
 type List struct {
 	First *ListRecord
 	Last  *ListRecord
@@ -26,10 +26,15 @@ type List struct {
 	insertionQueue *List
 }
 
-// BulkPush inserts new tasks into the list
+// NewListQueue creates and returns a new list
+func NewListQueue() *List {
+	return &List{}
+}
+
+// Insert inserts new tasks into the list
 // Their potential is calculated and used to determine the position
 // of the inserts
-func (l *List) BulkPush(tasks []*Task) {
+func (l *List) Insert(tasks []*Task) {
 	// A quick path for an empty insertion
 	if len(tasks) == 0 {
 		return
@@ -94,38 +99,32 @@ func (l *List) BulkPush(tasks []*Task) {
 	}
 }
 
-// TrimTail trims records from the tail of the list with potential smaller
-// than fiven argument
-func (l *List) TrimTail(potential int) {
+// TrimTail trims records from the tail of the list with distance greater
+// than the given argument
+func (l *List) TrimTail(distance int) {
 	// A quick path for an empty list
 	if l.First == nil {
 		return
 	}
 
 	// A quick path for a tail not suitable for trimming
-	if l.Last.Potential < potential {
+	if l.Last.Potential < distance {
 		return
 	}
 
 	// A quick path for a full list trim
-	if l.First.Potential >= potential {
+	if l.First.Potential >= distance {
 		l.clear()
 		return
 	}
 
 	for checked := l.Last; checked != nil; checked = checked.prev {
-		if checked.Potential < potential {
+		if checked.Potential < distance {
 			l.Last = checked
 			l.Last.next = nil
 			break
 		}
 	}
-}
-
-// clear clears the list of all records
-func (l *List) clear() {
-	l.First = nil
-	l.Last = nil
 }
 
 // IsEmpty checks if there is no records in the list.
@@ -137,10 +136,10 @@ func (l *List) IsEmpty() bool {
 	return false
 }
 
-// Pop gets the task from the first record in the list and
+// PopFirst gets the task from the first record in the list and
 // removes it from the list.
 // If list is empty, it returns nil.
-func (l *List) Pop() *Task {
+func (l *List) PopFirst() *Task {
 	if l.First == nil {
 		return nil
 	}
@@ -207,4 +206,10 @@ func (l *List) rawInsert(task *Task, potential int) {
 	record.prev = l.Last
 	l.Last.next = record
 	l.Last = record
+}
+
+// clear clears the list of all records
+func (l *List) clear() {
+	l.First = nil
+	l.Last = nil
 }
