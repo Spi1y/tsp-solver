@@ -55,9 +55,9 @@ func TestList_rawInsert(t *testing.T) {
 
 func TestList_Insert(t *testing.T) {
 	tests := []struct {
-		name       string
-		potentials []int
-		expected   string
+		name      string
+		distances []int
+		expected  string
 	}{
 		{
 			"Into empty list", []int{5},
@@ -98,7 +98,7 @@ func TestList_Insert(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			args = args[:0]
-			for _, potential := range tt.potentials {
+			for _, potential := range tt.distances {
 				args = append(args, &Task{Distance: potential})
 			}
 

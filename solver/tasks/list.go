@@ -13,7 +13,7 @@ type ListRecord struct {
 	Task *Task
 	// Estimation of Task potential to lead to the best solution
 	// This is a sum of Task.ActualDistance and Task.ProjectedDistance
-	Potential int
+	Distance int
 }
 
 // List is a double-linked sorted list of tasks
@@ -62,7 +62,7 @@ func (l *List) Insert(tasks []*Task) {
 	insertion := l.insertionQueue.First
 
 	// Check if new inserts have to go in the head of the list
-	for (insertion != nil) && (l.First.Potential >= insertion.Potential) {
+	for (insertion != nil) && (l.First.Distance >= insertion.Distance) {
 		// Extract the record from the insertion queue
 		newRecord := insertion
 		insertion = insertion.next
@@ -76,7 +76,7 @@ func (l *List) Insert(tasks []*Task) {
 	// Iterate over list records, inserting as needed
 	for listRecord := l.First; (listRecord != nil) && (insertion != nil); listRecord = listRecord.next {
 		// Iterate over remaining insertion queue, if there is suitable insertions to go before the listRecord
-		for (insertion != nil) && (listRecord.Potential >= insertion.Potential) {
+		for (insertion != nil) && (listRecord.Distance >= insertion.Distance) {
 			// Extract the record from the insertion queue
 			newRecord := insertion
 			insertion = insertion.next
@@ -108,18 +108,18 @@ func (l *List) TrimTail(distance int) {
 	}
 
 	// A quick path for a tail not suitable for trimming
-	if l.Last.Potential < distance {
+	if l.Last.Distance < distance {
 		return
 	}
 
 	// A quick path for a full list trim
-	if l.First.Potential >= distance {
+	if l.First.Distance >= distance {
 		l.clear()
 		return
 	}
 
 	for checked := l.Last; checked != nil; checked = checked.prev {
-		if checked.Potential < distance {
+		if checked.Distance < distance {
 			l.Last = checked
 			l.Last.next = nil
 			break
@@ -155,7 +155,7 @@ func (l *List) PopFirst() *Task {
 func (l *List) String() string {
 	var b strings.Builder
 	for record := l.First; record != nil; record = record.next {
-		fmt.Fprintf(&b, " %d", record.Potential)
+		fmt.Fprintf(&b, " %d", record.Distance)
 	}
 	return fmt.Sprintf("tasks.List:%s", b.String())
 }
@@ -165,10 +165,10 @@ func (l *List) String() string {
 // optimized bulk insertion into the main list
 func (l *List) rawInsert(task *Task, potential int) {
 	record := &ListRecord{
-		prev:      nil,
-		next:      nil,
-		Task:      task,
-		Potential: potential,
+		prev:     nil,
+		next:     nil,
+		Task:     task,
+		Distance: potential,
 	}
 
 	// A quick path for an empty list
@@ -180,7 +180,7 @@ func (l *List) rawInsert(task *Task, potential int) {
 	}
 
 	// Check if new insert have to go in the head of the list
-	if l.First.Potential >= record.Potential {
+	if l.First.Distance >= record.Distance {
 		record.next = l.First
 		l.First.prev = record
 		l.First = record
@@ -190,7 +190,7 @@ func (l *List) rawInsert(task *Task, potential int) {
 
 	// Iterate over list records, seeking the suitable insert position
 	for checked := l.First; checked != nil; checked = checked.next {
-		if checked.Potential >= record.Potential {
+		if checked.Distance >= record.Distance {
 			checked.prev.next = record
 			record.prev = checked.prev
 

@@ -3,6 +3,7 @@ package tasks
 import (
 	"container/heap"
 	"fmt"
+	"strings"
 )
 
 // heapRecord is a record of the heap
@@ -64,8 +65,6 @@ func NewHeapQueue() *Heap {
 		trimValue: -1,
 	}
 
-	heap.Init(h)
-
 	return h
 }
 
@@ -77,7 +76,11 @@ func (h *Heap) Insert(tasks []*Task) {
 	}
 
 	for _, task := range tasks {
-		heap.Push(h, task)
+		rec := &heapRecord{
+			task:     task,
+			distance: task.Distance,
+		}
+		heap.Push(h, rec)
 	}
 }
 
@@ -97,7 +100,7 @@ func (h *Heap) IsEmpty() bool {
 		return true
 	}
 
-	if h.slice[0].distance >= h.trimValue {
+	if (h.trimValue != -1) && (h.slice[0].distance >= h.trimValue) {
 		return true
 	}
 
@@ -112,15 +115,25 @@ func (h *Heap) PopFirst() *Task {
 		return nil
 	}
 
-	if h.slice[0].distance >= h.trimValue {
+	if (h.trimValue != -1) && (h.slice[0].distance >= h.trimValue) {
 		return nil
 	}
 
-	return heap.Pop(h).(heapRecord).task
+	val := heap.Pop(h)
+	return val.(*heapRecord).task
 }
 
 // String implements the Stringer interface
 // Used mainly for testing
 func (h *Heap) String() string {
-	return fmt.Sprintf("tasks.Heap:%v", h.slice)
+	var b strings.Builder
+
+	duplicate := NewHeapQueue()
+	duplicate.slice = append(duplicate.slice, h.slice...)
+
+	for val := duplicate.PopFirst(); val != nil; val = duplicate.PopFirst() {
+		fmt.Fprintf(&b, " %d", val.Distance)
+	}
+
+	return fmt.Sprintf("tasks.Heap:%s", b.String())
 }
