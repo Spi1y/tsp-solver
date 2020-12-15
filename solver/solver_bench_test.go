@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/Spi1y/tsp-solver/solver/matrix"
+	"github.com/Spi1y/tsp-solver/solver/tasks"
 )
 
 func baseMatrix17() [][]int {
@@ -29,41 +30,85 @@ func baseMatrix17() [][]int {
 	}
 }
 
-func runBenchamrk(size int, b *testing.B) {
+func runBenchamrk(b *testing.B, size int, qType tasks.QueueType) {
 	matrix17 := baseMatrix17()
 	sizedMatrix := matrix.ConvertToMatrix(matrix17[:size])
 
 	for n := 0; n < b.N; n++ {
 		s := &Solver{}
 		s.DistanceMatrix = sizedMatrix
-		s.Solve()
+		s.Solve(qType)
 	}
 }
 
-func BenchmarkSolverSolve5(b *testing.B) {
-	runBenchamrk(5, b)
+func BenchmarkSolverWithList5(b *testing.B) {
+	runBenchamrk(b, 5, tasks.QueueLinkedList)
 }
 
-func BenchmarkSolverSolve6(b *testing.B) {
-	runBenchamrk(6, b)
+func BenchmarkSolverWithList6(b *testing.B) {
+	runBenchamrk(b, 6, tasks.QueueLinkedList)
 }
 
-func BenchmarkSolverSolve7(b *testing.B) {
-	runBenchamrk(7, b)
+func BenchmarkSolverWithList7(b *testing.B) {
+	runBenchamrk(b, 7, tasks.QueueLinkedList)
 }
 
-func BenchmarkSolverSolve8(b *testing.B) {
-	runBenchamrk(8, b)
+func BenchmarkSolverWithList8(b *testing.B) {
+	runBenchamrk(b, 8, tasks.QueueLinkedList)
 }
 
-func BenchmarkSolverSolve9(b *testing.B) {
-	runBenchamrk(9, b)
+func BenchmarkSolverWithList9(b *testing.B) {
+	runBenchamrk(b, 9, tasks.QueueLinkedList)
 }
 
-func BenchmarkSolverSolve10(b *testing.B) {
-	runBenchamrk(10, b)
+func BenchmarkSolverWithList10(b *testing.B) {
+	runBenchamrk(b, 10, tasks.QueueLinkedList)
 }
 
-func BenchmarkSolverSolve11(b *testing.B) {
-	runBenchamrk(11, b)
+func BenchmarkSolverWithList11(b *testing.B) {
+	runBenchamrk(b, 11, tasks.QueueLinkedList)
+}
+
+func BenchmarkSolverWithList12(b *testing.B) {
+	runBenchamrk(b, 12, tasks.QueueLinkedList)
+}
+
+func BenchmarkSolverWithList13(b *testing.B) {
+	runBenchamrk(b, 13, tasks.QueueLinkedList)
+}
+
+func BenchmarkSolverWithHeap5(b *testing.B) {
+	runBenchamrk(b, 5, tasks.QueueHeap)
+}
+
+func BenchmarkSolverWithHeap6(b *testing.B) {
+	runBenchamrk(b, 6, tasks.QueueHeap)
+}
+
+func BenchmarkSolverWithHeap7(b *testing.B) {
+	runBenchamrk(b, 7, tasks.QueueHeap)
+}
+
+func BenchmarkSolverWithHeap8(b *testing.B) {
+	runBenchamrk(b, 8, tasks.QueueHeap)
+}
+
+func BenchmarkSolverWithHeap9(b *testing.B) {
+	runBenchamrk(b, 9, tasks.QueueHeap)
+}
+
+func BenchmarkSolverWithHeap10(b *testing.B) {
+	runBenchamrk(b, 10, tasks.QueueHeap)
+}
+
+func BenchmarkSolverWithHeap11(b *testing.B) {
+	runBenchamrk(b, 11, tasks.QueueHeap)
+}
+
+func BenchmarkSolverWithHeap12(b *testing.B) {
+	runBenchamrk(b, 12, tasks.QueueHeap)
+}
+
+func BenchmarkSolverWithHeap13(b *testing.B) {
+	runBenchamrk(b, 13, tasks.QueueHeap)
 }

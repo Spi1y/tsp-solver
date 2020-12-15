@@ -6,6 +6,7 @@ import (
 
 	"github.com/Spi1y/tsp-solver/solver"
 	"github.com/Spi1y/tsp-solver/solver/matrix"
+	"github.com/Spi1y/tsp-solver/solver/tasks"
 )
 
 func main() {
@@ -112,7 +113,7 @@ func showCase(name string, distanceMatrix matrix.Matrix, path1C []int, distance1
 	s.DistanceMatrix = distanceMatrix
 
 	start := time.Now()
-	path, distance, err := s.Solve()
+	path, distance, err := s.Solve(tasks.QueueLinkedList)
 	elapsed := time.Since(start)
 
 	if err != nil {
