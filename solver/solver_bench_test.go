@@ -31,9 +31,12 @@ func baseMatrix17() [][]int {
 }
 
 func runBenchamrk(b *testing.B, size int, qType tasks.QueueType) {
+	b.ReportAllocs()
+
 	matrix17 := baseMatrix17()
 	sizedMatrix := matrix.ConvertToMatrix(matrix17[:size])
 
+	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		s := &Solver{}
 		s.DistanceMatrix = sizedMatrix
