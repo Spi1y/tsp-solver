@@ -2,6 +2,8 @@ package iterator
 
 import (
 	"fmt"
+
+	"github.com/Spi1y/tsp-solver/solver2/types"
 )
 
 // Iterator is a calculator used to determine the following values:
@@ -9,7 +11,7 @@ import (
 // - rows and columns used to calculate distance lower estimate (based on the path and the next node)
 type Iterator struct {
 	// Size of the matrix, set in the Init()
-	size uint8
+	size types.Index
 
 	// Mask slice of visited nodes, used to simplify path processing
 	nodesVisited []bool
@@ -18,24 +20,24 @@ type Iterator struct {
 	lastNode int16
 
 	// Calculated lists
-	nodesToVisit  []uint8
-	colsToIterate []uint8
-	//rowsToIterate []uint8
+	nodesToVisit  []types.Index
+	colsToIterate []types.Index
+	//rowsToIterate []types.Index
 }
 
 // Init is used to initialize internal structures according to the distance
 // matrix size
-func (it *Iterator) Init(size uint8) {
+func (it *Iterator) Init(size types.Index) {
 	it.size = size
 
 	it.nodesVisited = make([]bool, size)
-	it.nodesToVisit = make([]uint8, size)
-	it.colsToIterate = make([]uint8, size)
-	//it.rowsToIterate = make([]uint8, size)
+	it.nodesToVisit = make([]types.Index, size)
+	it.colsToIterate = make([]types.Index, size)
+	//it.rowsToIterate = make([]types.Index, size)
 }
 
 // SetPath process given path and calculates internal data structures
-func (it *Iterator) SetPath(path []uint8) error {
+func (it *Iterator) SetPath(path []types.Index) error {
 	if it.size == 0 {
 		return fmt.Errorf("Iterator is not initialized")
 	}
@@ -44,11 +46,11 @@ func (it *Iterator) SetPath(path []uint8) error {
 		return fmt.Errorf("Path must include 0 node as the first element")
 	}
 
-	if it.size < uint8(len(path)) {
+	if it.size < types.Index(len(path)) {
 		return fmt.Errorf("Incorrect path: length %v is greater than matrix size %v", len(path), it.size)
 	}
 
-	nodesCount := it.size - uint8(len(path))
+	nodesCount := it.size - types.Index(len(path))
 	it.nodesToVisit = it.nodesToVisit[:nodesCount]
 
 	it.resetBuf()
@@ -60,14 +62,14 @@ func (it *Iterator) SetPath(path []uint8) error {
 		it.nodesVisited[node] = true
 	}
 
-	if it.size == uint8(len(path)) {
+	if it.size == types.Index(len(path)) {
 		return nil
 	}
 
 	c := 0
-	for i := 0; uint8(i) < it.size; i++ {
+	for i := 0; types.Index(i) < it.size; i++ {
 		if it.nodesVisited[i] == false {
-			it.nodesToVisit[c] = uint8(i)
+			it.nodesToVisit[c] = types.Index(i)
 			c++
 		}
 	}
@@ -82,13 +84,13 @@ func (it *Iterator) SetPath(path []uint8) error {
 }
 
 // NodesToVisit retrieves the list of nodes left to visit
-func (it *Iterator) NodesToVisit() []uint8 {
+func (it *Iterator) NodesToVisit() []types.Index {
 	return it.nodesToVisit
 }
 
 // ColsToIterate is used to calculate the list of column indices which have to
 // be processed to determine distance lower estimate, based on the path and the next node
-func (it *Iterator) ColsToIterate(node uint8) ([]uint8, error) {
+func (it *Iterator) ColsToIterate(node types.Index) ([]types.Index, error) {
 	if node >= it.size {
 		return nil, fmt.Errorf("Incorrect next node index %v", node)
 	}
@@ -106,10 +108,10 @@ func (it *Iterator) ColsToIterate(node uint8) ([]uint8, error) {
 		return nil, fmt.Errorf("Node %v already visited", node)
 	}
 
-	var index uint8
+	var index types.Index
 	for i, val := range it.nodesToVisit {
 		if val == node {
-			index = uint8(i)
+			index = types.Index(i)
 			break
 		}
 	}
@@ -126,8 +128,8 @@ func (it *Iterator) ColsToIterate(node uint8) ([]uint8, error) {
 
 // RowsToIterate is used to calculate the list of row indices which have to
 // be processed to determine distance lower estimate, based on the path and the next node
-// In current implementation, it is equal to it.nodesToVisit
-func (it *Iterator) RowsToIterate() []uint8 {
+// It is equal to it.nodesToVisit
+func (it *Iterator) RowsToIterate() []types.Index {
 	return it.nodesToVisit
 }
 
@@ -138,7 +140,7 @@ func (it *Iterator) resetBuf() {
 	}
 
 	it.nodesVisited[0] = false
-	for j := 1; uint8(j) < it.size; j *= 2 {
+	for j := 1; types.Index(j) < it.size; j *= 2 {
 		copy(it.nodesVisited[j:], it.nodesVisited[:j])
 	}
 }
