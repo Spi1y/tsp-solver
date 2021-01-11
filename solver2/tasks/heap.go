@@ -18,8 +18,6 @@ type Queue struct {
 // heapRecord is a record of the heap
 type heapRecord struct {
 	task *Task
-	// The projected path legth of the task
-	distance types.Distance
 
 	// The index is needed by update and is maintained by the heap.Interface methods.
 	index int
@@ -31,7 +29,7 @@ func (h *Queue) Len() int { return len(h.slice) }
 // Less is a comparison function, required for heap.interface
 func (h *Queue) Less(i, j int) bool {
 	// We have a minHeap, which means top record is a record with a lowest distance
-	return h.slice[i].distance < h.slice[j].distance
+	return h.slice[i].task.Estimate < h.slice[j].task.Estimate
 }
 
 // Swap swaps elements, required for heap.interface
@@ -79,8 +77,7 @@ func (h *Queue) Insert(tasks []*Task) {
 
 	for _, task := range tasks {
 		rec := &heapRecord{
-			task:     task,
-			distance: task.Distance,
+			task: task,
 		}
 		heap.Push(h, rec)
 	}
@@ -102,7 +99,7 @@ func (h *Queue) IsEmpty() bool {
 		return true
 	}
 
-	if (h.trimValue != -1) && (int(h.slice[0].distance) >= h.trimValue) {
+	if (h.trimValue != -1) && (int(h.slice[0].task.Estimate) >= h.trimValue) {
 		return true
 	}
 
@@ -117,7 +114,7 @@ func (h *Queue) PopFirst() *Task {
 		return nil
 	}
 
-	if (h.trimValue != -1) && (int(h.slice[0].distance) >= h.trimValue) {
+	if (h.trimValue != -1) && (int(h.slice[0].task.Estimate) >= h.trimValue) {
 		return nil
 	}
 
