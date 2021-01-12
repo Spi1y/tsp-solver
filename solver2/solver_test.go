@@ -8,7 +8,7 @@ import (
 )
 
 func TestSolverSolve(t *testing.T) {
-	tests := solveTestCases()
+	tests := solverTestCases()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &Solver{}
@@ -26,7 +26,7 @@ func TestSolverSolve(t *testing.T) {
 	}
 }
 
-func solveTestCases() []*solveTestCase {
+func solverTestCases() []*solveTestCase {
 	result := []*solveTestCase{}
 	result = append(result, solveTestCase2Points())
 	result = append(result, solveTestCase3Points())
