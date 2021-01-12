@@ -26,22 +26,22 @@ func TestSolverSolve(t *testing.T) {
 	}
 }
 
+func solveTestCases() []*solveTestCase {
+	result := []*solveTestCase{}
+	// result = append(result, solveTestCase2Points())
+	// result = append(result, solveTestCase3Points())
+	result = append(result, solveTestCase4Points())
+	// result = append(result, solveTestCase7Points())
+
+	return result
+}
+
 type solveTestCase struct {
 	name           string
 	distanceMatrix [][]types.Distance
 	path           []types.Index
 	dist           types.Distance
 	wantErr        bool
-}
-
-func solveTestCases() []*solveTestCase {
-	result := []*solveTestCase{}
-	// result = append(result, solveTestCaseNil())
-	result = append(result, solveTestCase2Points())
-	result = append(result, solveTestCase4Points())
-	result = append(result, solveTestCase7Points())
-
-	return result
 }
 
 func solveTestCase2Points() *solveTestCase {
@@ -54,6 +54,21 @@ func solveTestCase2Points() *solveTestCase {
 		},
 		[]types.Index{0, 1, 2, 0},
 		3,
+		false,
+	}
+}
+
+func solveTestCase3Points() *solveTestCase {
+	return &solveTestCase{
+		"Normal - 3 points",
+		[][]types.Distance{
+			{0, 1, 9, 9},
+			{9, 0, 9, 1},
+			{1, 9, 0, 9},
+			{9, 9, 1, 0},
+		},
+		[]types.Index{0, 1, 3, 2, 0},
+		4,
 		false,
 	}
 }
