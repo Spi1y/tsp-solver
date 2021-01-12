@@ -10,17 +10,10 @@ import (
 
 // Queue implements tasks queue based on binary heap
 type Queue struct {
-	slice []*heapRecord
+	slice []Task
 
-	trimValue int
-}
-
-// heapRecord is a record of the heap
-type heapRecord struct {
-	task Task
-
-	// The index is needed by update and is maintained by the heap.Interface methods.
-	index int
+	trimSet   bool
+	trimValue types.Distance
 }
 
 // Len returns len of the heap
@@ -29,21 +22,17 @@ func (h *Queue) Len() int { return len(h.slice) }
 // Less is a comparison function, required for heap.interface
 func (h *Queue) Less(i, j int) bool {
 	// We have a minHeap, which means top record is a record with a lowest distance
-	return h.slice[i].task.Estimate < h.slice[j].task.Estimate
+	return h.slice[i].Estimate < h.slice[j].Estimate
 }
 
 // Swap swaps elements, required for heap.interface
 func (h *Queue) Swap(i, j int) {
 	h.slice[i], h.slice[j] = h.slice[j], h.slice[i]
-	h.slice[i].index = i
-	h.slice[j].index = j
 }
 
 // Push pushes a new element to the heap, required for heap.interface
 func (h *Queue) Push(x interface{}) {
-	n := len(h.slice)
-	item := x.(*heapRecord)
-	item.index = n
+	item := x.(Task)
 	h.slice = append(h.slice, item)
 }
 
@@ -52,8 +41,6 @@ func (h *Queue) Pop() interface{} {
 	old := h.slice
 	n := len(old)
 	item := old[n-1]
-	old[n-1] = nil  // avoid memory leak
-	item.index = -1 // for safety
 	h.slice = old[0 : n-1]
 	return item
 }
@@ -61,8 +48,10 @@ func (h *Queue) Pop() interface{} {
 // NewHeapQueue creates and returns new heap queue
 func NewHeapQueue() *Queue {
 	h := &Queue{
-		slice:     nil,
-		trimValue: -1,
+		slice: nil,
+
+		trimValue: 0,
+		trimSet:   false,
 	}
 
 	return h
@@ -76,10 +65,7 @@ func (h *Queue) Insert(tasks []Task) {
 	}
 
 	for _, task := range tasks {
-		rec := &heapRecord{
-			task: task,
-		}
-		heap.Push(h, rec)
+		heap.Push(h, task)
 	}
 }
 
@@ -88,8 +74,9 @@ func (h *Queue) Insert(tasks []Task) {
 // now, we remember the trimming value and use it in PopFirst and IsEmpty to determine
 // if the queue should be empty.
 func (h *Queue) TrimTail(distance types.Distance) {
-	if (h.trimValue == -1) || (h.trimValue > int(distance)) {
-		h.trimValue = int(distance)
+	if !h.trimSet || (h.trimValue > distance) {
+		h.trimSet = true
+		h.trimValue = distance
 	}
 }
 
@@ -99,7 +86,7 @@ func (h *Queue) IsEmpty() bool {
 		return true
 	}
 
-	if (h.trimValue != -1) && (int(h.slice[0].task.Estimate) >= h.trimValue) {
+	if h.trimSet && (h.slice[0].Estimate >= h.trimValue) {
 		return true
 	}
 
@@ -114,12 +101,8 @@ func (h *Queue) PopFirst() (Task, error) {
 		return Task{}, fmt.Errorf("Queue is empty")
 	}
 
-	if (h.trimValue != -1) && (int(h.slice[0].task.Estimate) >= h.trimValue) {
-		return Task{}, fmt.Errorf("Queue is empty")
-	}
-
-	val := heap.Pop(h)
-	return val.(*heapRecord).task, nil
+	task := heap.Pop(h).(Task)
+	return task, nil
 }
 
 // String implements the Stringer interface
