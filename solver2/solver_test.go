@@ -28,10 +28,10 @@ func TestSolverSolve(t *testing.T) {
 
 func solveTestCases() []*solveTestCase {
 	result := []*solveTestCase{}
-	// result = append(result, solveTestCase2Points())
-	// result = append(result, solveTestCase3Points())
+	result = append(result, solveTestCase2Points())
+	result = append(result, solveTestCase3Points())
 	result = append(result, solveTestCase4Points())
-	// result = append(result, solveTestCase7Points())
+	result = append(result, solveTestCase7Points())
 
 	return result
 }

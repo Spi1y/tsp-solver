@@ -85,7 +85,9 @@ func (s *Solver) solveTask(t tasks.Task, newTasks []tasks.Task) (int, error) {
 		// and notifying solver about found solution
 		finalNode := nextNodes[0]
 
-		path := append(t.Path, finalNode, 0)
+		path := make([]types.Index, len(t.Path), len(t.Path)+2)
+		copy(path, t.Path)
+		path = append(path, finalNode, 0)
 		distance := t.Distance + s.matrix[currNode][finalNode] + s.matrix[finalNode][0]
 		s.newSolutionFound(path, distance)
 		newTasks = newTasks[:0]
