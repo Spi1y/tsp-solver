@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	solver "github.com/Spi1y/tsp-solver/solver"
@@ -57,70 +58,138 @@ func uintBaseMatrix17() [][]solver2_types.Distance {
 	}
 }
 
-func BenchmarkSolverComparison(b *testing.B) {
-	benchmarks := []struct {
-		name   string
-		size   int
-		solver int
-	}{
-		{"5	Solver1	List", 5, 1},
-		{"5	Solver1	Heap", 5, 2},
-		{"5	Solver2	Heap", 5, 3},
-		{"6	Solver1	List", 6, 1},
-		{"6	Solver1	Heap", 6, 2},
-		{"6	Solver2	Heap", 6, 3},
-		{"7	Solver1	List", 7, 1},
-		{"7	Solver1	Heap", 7, 2},
-		{"7	Solver2	Heap", 7, 3},
-		{"8	Solver1	List", 8, 1},
-		{"8	Solver1	Heap", 8, 2},
-		{"8	Solver2	Heap", 8, 3},
-		{"9	Solver1	List", 9, 1},
-		{"9	Solver1	Heap", 9, 2},
-		{"9	Solver1	Heap", 9, 3},
-		{"10	Solver2	Heap", 10, 3},
-		{"10	Solver1	List", 10, 1},
-		{"10	Solver1	Heap", 10, 2},
-	}
+func runBenchmarkCase(b *testing.B, bm bmCase) {
+	b.ReportAllocs()
 
-	matrix17 := baseMatrix17()
-	uintMatrix17 := uintBaseMatrix17()
+	switch bm.solver {
+	case 1:
+		matrix17 := baseMatrix17()
+		sizedMatrix := solver_matrix.ConvertToMatrix(matrix17[:bm.size])
+		s := &solver.Solver{}
+		s.DistanceMatrix = sizedMatrix
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			s.Solve(solver_tasks.QueueLinkedList)
+		}
+	case 2:
+		matrix17 := baseMatrix17()
+		sizedMatrix := solver_matrix.ConvertToMatrix(matrix17[:bm.size])
+		s := &solver.Solver{}
+		s.DistanceMatrix = sizedMatrix
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			s.Solve(solver_tasks.QueueHeap)
+		}
+	case 3:
+		uintMatrix17 := uintBaseMatrix17()
+		sizedMatrix := uintMatrix17[:bm.size]
+		for i := range sizedMatrix {
+			sizedMatrix[i] = sizedMatrix[i][:bm.size]
+		}
+		s := &solver2.Solver{}
+
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			s.Solve(sizedMatrix)
+		}
+	}
+}
+
+func BenchmarkSolverComparison(b *testing.B) {
+	benchmarks := []bmCase{
+		getBMCase(5, 1),
+		getBMCase(5, 2),
+		getBMCase(5, 3),
+		getBMCase(6, 1),
+		getBMCase(6, 2),
+		getBMCase(6, 3),
+		getBMCase(7, 1),
+		getBMCase(7, 2),
+		getBMCase(7, 3),
+		getBMCase(8, 1),
+		getBMCase(8, 2),
+		getBMCase(8, 3),
+		getBMCase(9, 1),
+		getBMCase(9, 2),
+		getBMCase(9, 3),
+	}
 
 	for _, bm := range benchmarks {
 		b.Run(bm.name, func(b *testing.B) {
-			b.ReportAllocs()
-
-			switch bm.solver {
-			case 1:
-				sizedMatrix := solver_matrix.ConvertToMatrix(matrix17[:bm.size])
-				s := &solver.Solver{}
-				s.DistanceMatrix = sizedMatrix
-
-				b.ResetTimer()
-				for i := 0; i < b.N; i++ {
-					s.Solve(solver_tasks.QueueLinkedList)
-				}
-			case 2:
-				sizedMatrix := solver_matrix.ConvertToMatrix(matrix17[:bm.size])
-				s := &solver.Solver{}
-				s.DistanceMatrix = sizedMatrix
-
-				b.ResetTimer()
-				for i := 0; i < b.N; i++ {
-					s.Solve(solver_tasks.QueueHeap)
-				}
-			case 3:
-				sizedMatrix := uintMatrix17[:bm.size]
-				for i := range sizedMatrix {
-					sizedMatrix[i] = sizedMatrix[i][:bm.size]
-				}
-				s := &solver2.Solver{}
-
-				b.ResetTimer()
-				for i := 0; i < b.N; i++ {
-					s.Solve(sizedMatrix)
-				}
-			}
+			runBenchmarkCase(b, bm)
 		})
+	}
+}
+
+func BenchmarkSolver1List5(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(5, 1))
+}
+
+func BenchmarkSolver1List7(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(7, 1))
+}
+
+func BenchmarkSolver1List9(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(9, 1))
+}
+
+func BenchmarkSolver1Heap5(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(5, 2))
+}
+
+func BenchmarkSolver1Heap7(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(7, 2))
+}
+
+func BenchmarkSolver1Heap9(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(9, 2))
+}
+
+func BenchmarkSolver1Heap11(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(11, 2))
+}
+
+func BenchmarkSolver2Heap5(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(5, 3))
+}
+
+func BenchmarkSolver2Heap7(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(7, 3))
+}
+
+func BenchmarkSolver2Heap9(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(9, 3))
+}
+
+func BenchmarkSolver2Heap11(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(11, 3))
+}
+
+func solverString(s int) string {
+	switch s {
+	case 1:
+		return "Solver1	List"
+	case 2:
+		return "Solver1	Heap"
+	case 3:
+		return "Solver2	Heap"
+	default:
+		return "Unknown"
+	}
+}
+
+type bmCase struct {
+	name   string
+	size   int
+	solver int
+}
+
+func getBMCase(size int, solver int) bmCase {
+	return bmCase{
+		name: fmt.Sprintf("%v	%v", size, solverString(solver)),
+		size:   size,
+		solver: solver,
 	}
 }
