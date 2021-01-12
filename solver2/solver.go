@@ -107,7 +107,7 @@ func (s *Solver) solveTask(t *tasks.Task) ([]*tasks.Task, error) {
 		}
 
 		for rowIndex, row := range rows {
-			min := s.matrix[row][cols[0]]
+			min := s.matrix[row][0]
 			var val types.Distance
 
 			// First pass to calculate row minimum
@@ -117,10 +117,6 @@ func (s *Solver) solveTask(t *tasks.Task) ([]*tasks.Task, error) {
 				}
 
 				val := s.matrix[row][col]
-				if val == 0 {
-					min = 0
-					break
-				}
 				if min > val {
 					min = val
 				}
@@ -129,6 +125,9 @@ func (s *Solver) solveTask(t *tasks.Task) ([]*tasks.Task, error) {
 
 			// Second pass to update column minimums in the buffer
 			for colIndex, col := range cols {
+				if row == col {
+					continue
+				}
 				val = s.matrix[row][col] - min
 
 				if rowIndex == 0 {
