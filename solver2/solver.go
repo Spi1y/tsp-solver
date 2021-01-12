@@ -78,6 +78,8 @@ func (s *Solver) newSolutionFound(path []types.Index, distance types.Distance) {
 }
 
 func (s *Solver) solveTask(t *tasks.Task) ([]*tasks.Task, error) {
+	// TODO - try aggressive approach with full path first
+
 	err := s.iterator.SetPath(t.Path)
 	if err != nil {
 		return nil, err
@@ -87,11 +89,12 @@ func (s *Solver) solveTask(t *tasks.Task) ([]*tasks.Task, error) {
 
 	currNode := t.Path[len(t.Path)-1]
 	nodesLeft := len(nextNodes)
-	if nodesLeft == 0 {
+	if nodesLeft == 1 {
 		// Final node, calculating return distance to root node
 		// and notifying solver about found solution
 		path := append(t.Path, 0)
-		distance := t.Distance + s.matrix[currNode][0]
+		finalNode := nextNodes[0]
+		distance := t.Distance + s.matrix[currNode][finalNode] + s.matrix[finalNode][0]
 		s.newSolutionFound(path, distance)
 		return nil, nil
 	}
@@ -135,7 +138,6 @@ func (s *Solver) solveTask(t *tasks.Task) ([]*tasks.Task, error) {
 					s.buffer[colIndex] = val
 				} else {
 					// Following rows, values are updated as needed
-					// TODO - we can store columns with min==0 and then skip them on the next rows
 					if s.buffer[colIndex] > val {
 						s.buffer[colIndex] = val
 					}
