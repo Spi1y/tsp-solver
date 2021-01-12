@@ -111,7 +111,9 @@ func (s *Solver) solveTask(t *tasks.Task) ([]*tasks.Task, error) {
 		}
 
 		for rowIndex, row := range rows {
-			min := s.matrix[row][0]
+			rowSlice := s.matrix[row]
+
+			min := rowSlice[0]
 			var val types.Distance
 
 			// First pass to calculate row minimum
@@ -120,7 +122,7 @@ func (s *Solver) solveTask(t *tasks.Task) ([]*tasks.Task, error) {
 					continue
 				}
 
-				val := s.matrix[row][col]
+				val := rowSlice[col]
 				if min > val {
 					min = val
 				}
@@ -128,20 +130,28 @@ func (s *Solver) solveTask(t *tasks.Task) ([]*tasks.Task, error) {
 			estimate += min
 
 			// Second pass to update column minimums in the buffer
+			if rowIndex == 0 {
+				// Fast path for a first row
+				for colIndex, col := range cols {
+					if row == col {
+						continue
+					}
+					// First row, minimum values are set without comparison
+					s.buffer[colIndex] = rowSlice[col] - min
+				}
+				continue
+			}
+
+			// Normal path for other rows
 			for colIndex, col := range cols {
 				if row == col {
 					continue
 				}
-				val = s.matrix[row][col] - min
+				val = rowSlice[col] - min
 
-				if rowIndex == 0 {
-					// First row, minimum values are set without comparison
+				// Values are updated as needed
+				if s.buffer[colIndex] > val {
 					s.buffer[colIndex] = val
-				} else {
-					// Following rows, values are updated as needed
-					if s.buffer[colIndex] > val {
-						s.buffer[colIndex] = val
-					}
 				}
 			}
 		}
