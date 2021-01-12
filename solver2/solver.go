@@ -92,8 +92,9 @@ func (s *Solver) solveTask(t *tasks.Task) ([]*tasks.Task, error) {
 	if nodesLeft == 1 {
 		// Final node, calculating return distance to root node
 		// and notifying solver about found solution
-		path := append(t.Path, 0)
 		finalNode := nextNodes[0]
+
+		path := append(t.Path, finalNode, 0)
 		distance := t.Distance + s.matrix[currNode][finalNode] + s.matrix[finalNode][0]
 		s.newSolutionFound(path, distance)
 		return nil, nil
