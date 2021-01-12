@@ -147,8 +147,16 @@ func BenchmarkSolver1Heap9(b *testing.B) {
 	runBenchmarkCase(b, getBMCase(9, 2))
 }
 
-func BenchmarkSolver1Heap11(b *testing.B) {
-	runBenchmarkCase(b, getBMCase(11, 2))
+func BenchmarkSolver1Heap13(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(13, 2))
+}
+
+func BenchmarkSolver1Heap15(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(15, 2))
+}
+
+func BenchmarkSolver1Heap16(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(16, 2))
 }
 
 func BenchmarkSolver2Heap5(b *testing.B) {
@@ -165,6 +173,14 @@ func BenchmarkSolver2Heap9(b *testing.B) {
 
 func BenchmarkSolver2Heap11(b *testing.B) {
 	runBenchmarkCase(b, getBMCase(11, 3))
+}
+
+func BenchmarkSolver2Heap15(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(15, 3))
+}
+
+func BenchmarkSolver2Heap16(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(16, 3))
 }
 
 func solverString(s int) string {
