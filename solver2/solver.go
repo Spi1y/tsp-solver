@@ -47,6 +47,8 @@ func (s *Solver) Solve(m [][]types.Distance) ([]types.Index, types.Distance, err
 	s.iterator = &iterator.Iterator{}
 	s.iterator.Init(types.Index(size))
 
+	newTasks := make([]tasks.Task, size)
+
 	rootTask := tasks.Task{
 		Path:     []types.Index{0},
 		Distance: 0,
@@ -60,34 +62,23 @@ func (s *Solver) Solve(m [][]types.Distance) ([]types.Index, types.Distance, err
 			return nil, 0, err
 		}
 
-		newTasks, err := s.solveTask(task)
+		count, err := s.solveTask(task, newTasks)
 		if err != nil {
 			return nil, 0, err
 		}
 
-		s.taskQueue.Insert(newTasks)
+		s.taskQueue.Insert(newTasks[:count])
 	}
 
 	return s.bestSolution, s.bestSolutionDistance, nil
 }
 
-func (s *Solver) newSolutionFound(path []types.Index, distance types.Distance) {
-	if (s.bestSolutionDistance != 0) && (distance >= s.bestSolutionDistance) {
-		return
-	}
-
-	s.bestSolution = path
-	s.bestSolutionDistance = distance
-
-	s.taskQueue.TrimTail(distance)
-}
-
-func (s *Solver) solveTask(t tasks.Task) ([]tasks.Task, error) {
+func (s *Solver) solveTask(t tasks.Task, newTasks []tasks.Task) (int, error) {
 	// TODO - try aggressive approach with full path first
 
 	err := s.iterator.SetPath(t.Path)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	nextNodes := s.iterator.NodesToVisit()
 	rows := s.iterator.RowsToIterate()
@@ -102,17 +93,16 @@ func (s *Solver) solveTask(t tasks.Task) ([]tasks.Task, error) {
 		path := append(t.Path, finalNode, 0)
 		distance := t.Distance + s.matrix[currNode][finalNode] + s.matrix[finalNode][0]
 		s.newSolutionFound(path, distance)
-		return nil, nil
+		newTasks = newTasks[:0]
+		return 0, nil
 	}
-
-	newTasks := make([]tasks.Task, nodesLeft)
 
 	for i, nextNode := range nextNodes {
 
 		var estimate types.Distance
 		cols, err := s.iterator.ColsToIterate(nextNode)
 		if err != nil {
-			return nil, err
+			return 0, err
 		}
 
 		for rowIndex, row := range rows {
@@ -177,5 +167,16 @@ func (s *Solver) solveTask(t tasks.Task) ([]tasks.Task, error) {
 		newTasks[i].Estimate = distance + estimate
 	}
 
-	return newTasks, nil
+	return nodesLeft, nil
+}
+
+func (s *Solver) newSolutionFound(path []types.Index, distance types.Distance) {
+	if (s.bestSolutionDistance != 0) && (distance >= s.bestSolutionDistance) {
+		return
+	}
+
+	s.bestSolution = path
+	s.bestSolutionDistance = distance
+
+	s.taskQueue.TrimTail(distance)
 }
