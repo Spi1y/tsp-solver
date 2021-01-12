@@ -56,12 +56,7 @@ func (s *Solver) Solve(m [][]types.Distance) ([]types.Index, types.Distance, err
 	}
 	s.taskQueue.Insert([]tasks.Task{rootTask})
 
-	for !s.taskQueue.IsEmpty() {
-		task, err := s.taskQueue.PopFirst()
-		if err != nil {
-			return nil, 0, err
-		}
-
+	for task, err := s.taskQueue.PopFirst(); err == nil; task, err = s.taskQueue.PopFirst() {
 		count, err := s.solveTask(task, newTasks)
 		if err != nil {
 			return nil, 0, err
@@ -96,6 +91,9 @@ func (s *Solver) solveTask(t tasks.Task, newTasks []tasks.Task) (int, error) {
 		newTasks = newTasks[:0]
 		return 0, nil
 	}
+
+	newPathLen := len(t.Path) + 1
+	pathsSlice := make([]types.Index, nodesLeft*newPathLen)
 
 	for i, nextNode := range nextNodes {
 
@@ -156,9 +154,9 @@ func (s *Solver) solveTask(t tasks.Task, newTasks []tasks.Task) (int, error) {
 			estimate += s.buffer[colIndex]
 		}
 
-		path := make([]types.Index, 0, len(t.Path)+1)
-		path = append(path, t.Path...)
-		path = append(path, nextNode)
+		path := pathsSlice[i*newPathLen : (i+1)*newPathLen]
+		copy(path, t.Path)
+		path[newPathLen-1] = nextNode
 
 		distance := t.Distance + s.matrix[currNode][nextNode]
 
