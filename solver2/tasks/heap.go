@@ -17,7 +17,7 @@ type Queue struct {
 
 // heapRecord is a record of the heap
 type heapRecord struct {
-	task *Task
+	task Task
 
 	// The index is needed by update and is maintained by the heap.Interface methods.
 	index int
@@ -69,7 +69,7 @@ func NewHeapQueue() *Queue {
 }
 
 // Insert inserts several records to the queue
-func (h *Queue) Insert(tasks []*Task) {
+func (h *Queue) Insert(tasks []Task) {
 	// A quick path for an empty insertion
 	if len(tasks) == 0 {
 		return
@@ -109,17 +109,17 @@ func (h *Queue) IsEmpty() bool {
 // PopFirst gets the task from the first record in the list and
 // removes it from the list.
 // If list is empty, it returns nil.
-func (h *Queue) PopFirst() *Task {
+func (h *Queue) PopFirst() (Task, error) {
 	if h.IsEmpty() {
-		return nil
+		return Task{}, fmt.Errorf("Queue is empty")
 	}
 
 	if (h.trimValue != -1) && (int(h.slice[0].task.Estimate) >= h.trimValue) {
-		return nil
+		return Task{}, fmt.Errorf("Queue is empty")
 	}
 
 	val := heap.Pop(h)
-	return val.(*heapRecord).task
+	return val.(*heapRecord).task, nil
 }
 
 // String implements the Stringer interface
@@ -130,7 +130,7 @@ func (h *Queue) String() string {
 	duplicate := NewHeapQueue()
 	duplicate.slice = append(duplicate.slice, h.slice...)
 
-	for val := duplicate.PopFirst(); val != nil; val = duplicate.PopFirst() {
+	for val, err := duplicate.PopFirst(); err == nil; val, err = duplicate.PopFirst() {
 		fmt.Fprintf(&b, " %d", val.Distance)
 	}
 

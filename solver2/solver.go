@@ -47,19 +47,24 @@ func (s *Solver) Solve(m [][]types.Distance) ([]types.Index, types.Distance, err
 	s.iterator = &iterator.Iterator{}
 	s.iterator.Init(types.Index(size))
 
-	rootTask := &tasks.Task{
+	rootTask := tasks.Task{
 		Path:     []types.Index{0},
 		Distance: 0,
 		Estimate: 0,
 	}
-	s.taskQueue.Insert([]*tasks.Task{rootTask})
+	s.taskQueue.Insert([]tasks.Task{rootTask})
 
 	for !s.taskQueue.IsEmpty() {
-		task := s.taskQueue.PopFirst()
+		task, err := s.taskQueue.PopFirst()
+		if err != nil {
+			return nil, 0, err
+		}
+
 		newTasks, err := s.solveTask(task)
 		if err != nil {
 			return nil, 0, err
 		}
+
 		s.taskQueue.Insert(newTasks)
 	}
 
@@ -77,7 +82,7 @@ func (s *Solver) newSolutionFound(path []types.Index, distance types.Distance) {
 	s.taskQueue.TrimTail(distance)
 }
 
-func (s *Solver) solveTask(t *tasks.Task) ([]*tasks.Task, error) {
+func (s *Solver) solveTask(t tasks.Task) ([]tasks.Task, error) {
 	// TODO - try aggressive approach with full path first
 
 	err := s.iterator.SetPath(t.Path)
@@ -100,7 +105,7 @@ func (s *Solver) solveTask(t *tasks.Task) ([]*tasks.Task, error) {
 		return nil, nil
 	}
 
-	newTasks := make([]*tasks.Task, nodesLeft)
+	newTasks := make([]tasks.Task, nodesLeft)
 
 	for i, nextNode := range nextNodes {
 
@@ -167,11 +172,9 @@ func (s *Solver) solveTask(t *tasks.Task) ([]*tasks.Task, error) {
 
 		distance := t.Distance + s.matrix[currNode][nextNode]
 
-		newTasks[i] = &tasks.Task{
-			Path:     path,
-			Distance: distance,
-			Estimate: distance + estimate,
-		}
+		newTasks[i].Path = path
+		newTasks[i].Distance = distance
+		newTasks[i].Estimate = distance + estimate
 	}
 
 	return newTasks, nil

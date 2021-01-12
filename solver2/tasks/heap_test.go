@@ -47,13 +47,13 @@ func TestHeap_Insert(t *testing.T) {
 		},
 	}
 	list := NewHeapQueue()
-	args := make([]*Task, 0)
+	args := make([]Task, 0)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			args = args[:0]
 			for _, potential := range tt.distances {
-				args = append(args, &Task{
+				args = append(args, Task{
 					Distance: potential,
 					Estimate: potential})
 			}
