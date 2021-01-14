@@ -9,6 +9,7 @@ import (
 	solver_tasks "github.com/Spi1y/tsp-solver/solver/tasks"
 
 	solver2 "github.com/Spi1y/tsp-solver/solver2"
+	"github.com/Spi1y/tsp-solver/solver2/types"
 	solver2_types "github.com/Spi1y/tsp-solver/solver2/types"
 )
 
@@ -49,6 +50,19 @@ func runBenchmarkCase(b *testing.B, bm bmCase) {
 			for i := 0; i < b.N; i++ {
 				s.Solve(sizedMatrix)
 			}
+		case 4:
+			uintMatrix17 := uintBaseMatrix17()
+			sizedMatrix := uintMatrix17[:bm.size]
+			for i := range sizedMatrix {
+				sizedMatrix[i] = sizedMatrix[i][:bm.size]
+			}
+			s := &solver2.Solver{}
+			s.RecursiveThreshold = types.Index(bm.size + 1)
+
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				s.Solve(sizedMatrix)
+			}
 		}
 	})
 }
@@ -57,18 +71,28 @@ func BenchmarkSolverSize5(b *testing.B) {
 	runBenchmarkCase(b, getBMCase(5, 1))
 	runBenchmarkCase(b, getBMCase(5, 2))
 	runBenchmarkCase(b, getBMCase(5, 3))
+	runBenchmarkCase(b, getBMCase(5, 4))
 }
 
 func BenchmarkSolverSize7(b *testing.B) {
 	runBenchmarkCase(b, getBMCase(7, 1))
 	runBenchmarkCase(b, getBMCase(7, 2))
 	runBenchmarkCase(b, getBMCase(7, 3))
+	runBenchmarkCase(b, getBMCase(7, 4))
+}
+
+func BenchmarkSolverSize8(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(8, 1))
+	runBenchmarkCase(b, getBMCase(8, 2))
+	runBenchmarkCase(b, getBMCase(8, 3))
+	runBenchmarkCase(b, getBMCase(8, 4))
 }
 
 func BenchmarkSolverSize9(b *testing.B) {
 	runBenchmarkCase(b, getBMCase(9, 1))
 	runBenchmarkCase(b, getBMCase(9, 2))
 	runBenchmarkCase(b, getBMCase(9, 3))
+	runBenchmarkCase(b, getBMCase(9, 4))
 }
 
 func BenchmarkSolverSize11(b *testing.B) {
@@ -111,6 +135,8 @@ func solverString(s int) string {
 		return "Solver1	Heap"
 	case 3:
 		return "Solver2	Heap"
+	case 4:
+		return "Solver2	Recursive"
 	default:
 		return "Unknown"
 	}
