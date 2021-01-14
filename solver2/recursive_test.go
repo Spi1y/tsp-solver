@@ -26,7 +26,7 @@ func TestSolver_SolveRecursively(t *testing.T) {
 			s.iterator.SetPath([]types.Index{0})
 			nextNodes := s.iterator.NodesToVisit()
 
-			path, dist := s.SolveRecursively(0, nextNodes)
+			path, dist := s.solveRecursively(0, nextNodes)
 			fullpath := make([]types.Index, 0)
 			fullpath = append(fullpath, 0)
 			fullpath = append(fullpath, path...)

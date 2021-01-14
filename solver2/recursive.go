@@ -4,9 +4,9 @@ import (
 	"github.com/Spi1y/tsp-solver/solver2/types"
 )
 
-// SolveRecursively solves TSP recursively (brute-force). Depite its exponential O(),
+// solveRecursively solves TSP recursively (brute-force). Depite its exponential O(),
 // on small matrices it will be faster than other "smarter" algorithms
-func (s *Solver) SolveRecursively(currNode types.Index, nextNodes []types.Index) ([]types.Index, types.Distance) {
+func (s *Solver) solveRecursively(currNode types.Index, nextNodes []types.Index) ([]types.Index, types.Distance) {
 	bestPath := make([]types.Index, 0, len(nextNodes)+2)
 	var bestDistance types.Distance
 
