@@ -69,6 +69,11 @@ func (h *Queue) Insert(tasks []Task) {
 	}
 }
 
+// InsertSingle inserts single record to the queue
+func (h *Queue) InsertSingle(task Task) {
+	heap.Push(h, task)
+}
+
 // TrimTail should trim records from the tail of the queue with a distance greater
 // than the given argument. However, it is very costly to do so with the heap, so for
 // now, we remember the trimming value and use it in PopFirst and IsEmpty to determine
