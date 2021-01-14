@@ -11,6 +11,8 @@ import (
 // Solver is a TSP solver object. It is used to set a distance matrix and start
 // calculations
 type Solver struct {
+	RecursiveThreshold types.Index
+
 	// Distance matrix
 	matrix [][]types.Distance
 	// Iterator (see package docs)
@@ -80,6 +82,19 @@ func (s *Solver) solveTask(t tasks.Task, newTasks []tasks.Task) (int, error) {
 
 	currNode := t.Path[len(t.Path)-1]
 	nodesLeft := len(nextNodes)
+
+	if nodesLeft <= int(s.RecursiveThreshold) {
+		tailpath, taildistance := s.solveRecursively(currNode, nextNodes)
+		path := make([]types.Index, len(t.Path), len(t.Path)+len(tailpath))
+		copy(path, t.Path)
+		path = append(path, tailpath...)
+		distance := t.Distance + taildistance
+
+		s.newSolutionFound(path, distance)
+		newTasks = newTasks[:0]
+		return 0, nil
+	}
+
 	if nodesLeft == 1 {
 		// Final node, calculating return distance to root node
 		// and notifying solver about found solution

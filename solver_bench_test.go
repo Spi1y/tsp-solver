@@ -12,43 +12,48 @@ import (
 	solver2_types "github.com/Spi1y/tsp-solver/solver2/types"
 )
 
+func runBenchmarkSolver1(b *testing.B, bm bmCase, q solver_tasks.QueueType) {
+	matrix17 := baseMatrix17()
+	sizedMatrix := solver_matrix.ConvertToMatrix(matrix17[:bm.size])
+	s := &solver.Solver{}
+	s.DistanceMatrix = sizedMatrix
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		s.Solve(q)
+	}
+}
+
+func runBenchmarkSolver2(b *testing.B, bm bmCase, threshold int) {
+	uintMatrix17 := uintBaseMatrix17()
+	sizedMatrix := uintMatrix17[:bm.size]
+	for i := range sizedMatrix {
+		sizedMatrix[i] = sizedMatrix[i][:bm.size]
+	}
+	s := &solver2.Solver{}
+	s.RecursiveThreshold = solver2_types.Index(threshold)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		s.Solve(sizedMatrix)
+	}
+}
+
 func runBenchmarkCase(b *testing.B, bm bmCase) {
 	b.Run(bm.name, func(b *testing.B) {
 		b.ReportAllocs()
 
 		switch bm.solver {
 		case 1:
-			matrix17 := baseMatrix17()
-			sizedMatrix := solver_matrix.ConvertToMatrix(matrix17[:bm.size])
-			s := &solver.Solver{}
-			s.DistanceMatrix = sizedMatrix
-
-			b.ResetTimer()
-			for i := 0; i < b.N; i++ {
-				s.Solve(solver_tasks.QueueLinkedList)
-			}
+			runBenchmarkSolver1(b, bm, solver_tasks.QueueLinkedList)
 		case 2:
-			matrix17 := baseMatrix17()
-			sizedMatrix := solver_matrix.ConvertToMatrix(matrix17[:bm.size])
-			s := &solver.Solver{}
-			s.DistanceMatrix = sizedMatrix
-
-			b.ResetTimer()
-			for i := 0; i < b.N; i++ {
-				s.Solve(solver_tasks.QueueHeap)
-			}
+			runBenchmarkSolver1(b, bm, solver_tasks.QueueHeap)
 		case 3:
-			uintMatrix17 := uintBaseMatrix17()
-			sizedMatrix := uintMatrix17[:bm.size]
-			for i := range sizedMatrix {
-				sizedMatrix[i] = sizedMatrix[i][:bm.size]
-			}
-			s := &solver2.Solver{}
-
-			b.ResetTimer()
-			for i := 0; i < b.N; i++ {
-				s.Solve(sizedMatrix)
-			}
+			runBenchmarkSolver2(b, bm, 0)
+		case 4:
+			runBenchmarkSolver2(b, bm, bm.size+1)
+		case 5:
+			runBenchmarkSolver2(b, bm, 3)
 		}
 	})
 }
@@ -57,42 +62,61 @@ func BenchmarkSolverSize5(b *testing.B) {
 	runBenchmarkCase(b, getBMCase(5, 1))
 	runBenchmarkCase(b, getBMCase(5, 2))
 	runBenchmarkCase(b, getBMCase(5, 3))
+	runBenchmarkCase(b, getBMCase(5, 4))
+	runBenchmarkCase(b, getBMCase(5, 5))
 }
 
 func BenchmarkSolverSize7(b *testing.B) {
 	runBenchmarkCase(b, getBMCase(7, 1))
 	runBenchmarkCase(b, getBMCase(7, 2))
 	runBenchmarkCase(b, getBMCase(7, 3))
+	runBenchmarkCase(b, getBMCase(7, 4))
+	runBenchmarkCase(b, getBMCase(7, 5))
+}
+
+func BenchmarkSolverSize8(b *testing.B) {
+	runBenchmarkCase(b, getBMCase(8, 1))
+	runBenchmarkCase(b, getBMCase(8, 2))
+	runBenchmarkCase(b, getBMCase(8, 3))
+	runBenchmarkCase(b, getBMCase(8, 4))
+	runBenchmarkCase(b, getBMCase(8, 5))
 }
 
 func BenchmarkSolverSize9(b *testing.B) {
 	runBenchmarkCase(b, getBMCase(9, 1))
 	runBenchmarkCase(b, getBMCase(9, 2))
 	runBenchmarkCase(b, getBMCase(9, 3))
+	runBenchmarkCase(b, getBMCase(9, 4))
+	runBenchmarkCase(b, getBMCase(9, 5))
 }
 
 func BenchmarkSolverSize11(b *testing.B) {
 	runBenchmarkCase(b, getBMCase(11, 1))
 	runBenchmarkCase(b, getBMCase(11, 2))
 	runBenchmarkCase(b, getBMCase(11, 3))
+	runBenchmarkCase(b, getBMCase(11, 5))
 }
 
 func BenchmarkSolverSize13(b *testing.B) {
 	runBenchmarkCase(b, getBMCase(13, 2))
 	runBenchmarkCase(b, getBMCase(13, 3))
+	runBenchmarkCase(b, getBMCase(13, 5))
 }
 
 func BenchmarkSolverSize15(b *testing.B) {
 	runBenchmarkCase(b, getBMCase(15, 2))
 	runBenchmarkCase(b, getBMCase(15, 3))
+	runBenchmarkCase(b, getBMCase(15, 5))
 }
 
 func BenchmarkSolverSize16(b *testing.B) {
 	runBenchmarkCase(b, getBMCase(16, 3))
+	runBenchmarkCase(b, getBMCase(16, 5))
 }
 
 func BenchmarkSolverSize17(b *testing.B) {
 	runBenchmarkCase(b, getBMCase(17, 3))
+	runBenchmarkCase(b, getBMCase(17, 5))
 }
 
 func getBMCase(size int, solver int) bmCase {
@@ -111,6 +135,10 @@ func solverString(s int) string {
 		return "Solver1	Heap"
 	case 3:
 		return "Solver2	Heap"
+	case 4:
+		return "Solver2	Recursive"
+	case 5:
+		return "Solver2	Hybrid"
 	default:
 		return "Unknown"
 	}

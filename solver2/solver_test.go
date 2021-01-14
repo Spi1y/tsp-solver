@@ -8,25 +8,28 @@ import (
 )
 
 func TestSolverSolve(t *testing.T) {
-	tests := solveTestCases()
+	tests := solverTestCases()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &Solver{}
 
-			path, dist, err := s.Solve(tt.distanceMatrix)
+			for i := 0; i < 1+len(tt.distanceMatrix); i++ {
+				s.RecursiveThreshold = types.Index(i)
+				path, dist, err := s.Solve(tt.distanceMatrix)
 
-			assert.Equal(t, tt.path, path)
-			assert.Equal(t, tt.dist, dist)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
+				assert.Equal(t, tt.path, path)
+				assert.Equal(t, tt.dist, dist)
+				if tt.wantErr {
+					assert.Error(t, err)
+				} else {
+					assert.NoError(t, err)
+				}
 			}
 		})
 	}
 }
 
-func solveTestCases() []*solveTestCase {
+func solverTestCases() []*solveTestCase {
 	result := []*solveTestCase{}
 	result = append(result, solveTestCase2Points())
 	result = append(result, solveTestCase3Points())
