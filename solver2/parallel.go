@@ -22,7 +22,10 @@ func (s *Solver) queueProcessor(done chan<- struct{}) {
 		return
 	}
 
-	threadscount := runtime.NumCPU()
+	threadscount := runtime.NumCPU() - 1
+	if threadscount == 0 {
+		threadscount = 1
+	}
 
 	readyToProcess := make(chan struct{}, threadscount)
 	tasksToProcess := make(chan tasks.Task, threadscount)
