@@ -103,7 +103,7 @@ func (s *Solver) processTask(it *iterator.Iterator, buf []types.Distance, t task
 					continue
 				}
 
-				val := rowSlice[col]
+				val = rowSlice[col]
 				if min > val {
 					min = val
 				}
@@ -178,7 +178,8 @@ func (s *Solver) solveParallel() {
 
 	busyThreads := threadscount
 
-	for !(s.taskQueue.IsEmpty() && busyThreads == 0) {
+	var noTasksLeft, chanellsAreClear bool
+	for {
 		select {
 		case <-readyToProcess:
 			busyThreads--
@@ -195,14 +196,12 @@ func (s *Solver) solveParallel() {
 				busyThreads++
 			}
 		}
-	}
 
-	// There can be solutions left in channel
-	// It is safe to use len(chan) here, baecause all writers are already
-	// finished processing (busyThreads ==0)
-	for len(solutionFound) != 0 {
-		solution := <-solutionFound
-		s.newSolutionFound(solution.path, solution.distance)
+		noTasksLeft = s.taskQueue.IsEmpty() && busyThreads == 0
+		chanellsAreClear = len(tasksToQueue) == 0 && len(solutionFound) == 0
+		if noTasksLeft && chanellsAreClear {
+			break
+		}
 	}
 
 	for i := 0; i < threadscount; i++ {
