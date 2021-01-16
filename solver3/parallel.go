@@ -189,12 +189,13 @@ func (s *Solver) solveParallel() {
 			s.newSolutionFound(solution.path, solution.distance)
 		}
 
-		if threadscount != busyThreads {
+		if threadscount != busyThreads && !s.taskQueue.IsEmpty() {
 			task, err := s.taskQueue.PopFirst()
-			if err == nil {
-				tasksToProcess <- task
-				busyThreads++
+			if err != nil {
+				panic(err)
 			}
+			tasksToProcess <- task
+			busyThreads++
 		}
 
 		noTasksLeft = s.taskQueue.IsEmpty() && busyThreads == 0
