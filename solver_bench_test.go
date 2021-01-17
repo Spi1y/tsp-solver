@@ -105,7 +105,7 @@ func BenchmarkSolverSize13(b *testing.B) {
 
 func BenchmarkSolverSize15(b *testing.B) {
 	//runBenchmarkSet(b, 15, []int{2, 3, 5, 6})
-	runBenchmarkSet(b, 15, []int{5, 6})
+	runBenchmarkSet(b, 15, []int{6})
 }
 
 func BenchmarkSolverSize16(b *testing.B) {

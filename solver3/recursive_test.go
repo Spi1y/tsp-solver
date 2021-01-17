@@ -30,7 +30,9 @@ func TestSolver_SolveRecursively(t *testing.T) {
 			fullpath = append(fullpath, 0)
 			fullpath = append(fullpath, path...)
 
-			assert.Equal(t, tt.path, fullpath)
+			if len(tt.path) != 0 {
+				assert.Equal(t, tt.path, fullpath)
+			}
 			assert.Equal(t, tt.dist, dist)
 		})
 	}

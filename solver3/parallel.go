@@ -13,41 +13,42 @@ type solution struct {
 	distance types.Distance
 }
 
-func (s *Solver) taskProcessor(ready chan<- struct{}, task <-chan tasks.Task, results chan<- tasks.Task, solutions chan<- solution, done <-chan struct{}) {
-	ready <- struct{}{}
-	newTasks := make([]tasks.Task, len(s.matrix))
+type processingPacket struct {
+	task     tasks.Task
+	newTasks []tasks.Task
+	solution struct {
+		path     []types.Index
+		distance types.Distance
+	}
+}
 
+func (s *Solver) taskProcessor(in <-chan *processingPacket, out chan<- *processingPacket, done <-chan struct{}) {
 	size := len(s.matrix)
-	it := &iterator.Iterator{}
-	it.Init(types.Index(size))
-	buf := make([]types.Distance, size)
+	iter := &iterator.Iterator{}
+	iter.Init(types.Index(size))
+	buff := make([]types.Distance, size)
 
 	for {
 		select {
-		case t := <-task:
-			taskcount, solution, err := s.processTask(it, buf, t, newTasks)
+		case pkt := <-in:
+			err := s.processTask(iter, buff, pkt)
 			if err != nil {
 				panic(err)
 			}
-			if solution != nil {
-				solutions <- *solution
-			}
-			for _, t := range newTasks[:taskcount] {
-				results <- t
-			}
-			ready <- struct{}{}
+			out <- pkt
 		case <-done:
 			return
 		}
 	}
 }
 
-func (s *Solver) processTask(it *iterator.Iterator, buf []types.Distance, t tasks.Task, newTasks []tasks.Task) (int, *solution, error) {
+func (s *Solver) processTask(it *iterator.Iterator, buf []types.Distance, pkt *processingPacket) error {
 	// TODO - try aggressive approach with full path first
 
+	t := pkt.task
 	err := it.SetPath(t.Path)
 	if err != nil {
-		return 0, nil, err
+		return err
 	}
 	nextNodes := it.NodesToVisit()
 	rows := it.RowsToIterate()
@@ -56,39 +57,42 @@ func (s *Solver) processTask(it *iterator.Iterator, buf []types.Distance, t task
 	nodesLeft := len(nextNodes)
 
 	if nodesLeft <= int(s.RecursiveThreshold) {
+		// Calculate remaining path through brute-force recursion
 		tailpath, taildistance := s.solveRecursively(currNode, nextNodes)
 		path := make([]types.Index, len(t.Path), len(t.Path)+len(tailpath))
 		copy(path, t.Path)
-		path = append(path, tailpath...)
-		distance := t.Distance + taildistance
 
-		newTasks = newTasks[:0]
-		return 0, &solution{path: path, distance: distance}, nil
+		pkt.solution.path = append(path, tailpath...)
+		pkt.solution.distance = t.Distance + taildistance
+		pkt.newTasks = pkt.newTasks[:0]
+
+		return nil
 	}
 
 	if nodesLeft == 1 {
-		// Final node, calculating return distance to root node
-		// and notifying solver about found solution
+		// Final node, calculate return distance to root node and publish solution
 		finalNode := nextNodes[0]
 
 		path := make([]types.Index, len(t.Path), len(t.Path)+2)
 		copy(path, t.Path)
-		path = append(path, finalNode, 0)
-		distance := t.Distance + s.matrix[currNode][finalNode] + s.matrix[finalNode][0]
 
-		newTasks = newTasks[:0]
-		return 0, &solution{path: path, distance: distance}, nil
+		pkt.solution.path = append(path, finalNode, 0)
+		pkt.solution.distance = t.Distance + s.matrix[currNode][finalNode] + s.matrix[finalNode][0]
+		pkt.newTasks = pkt.newTasks[:0]
+		return nil
 	}
 
 	newPathLen := len(t.Path) + 1
 	pathsSlice := make([]types.Index, nodesLeft*newPathLen)
+	pkt.newTasks = pkt.newTasks[:nodesLeft]
+	pkt.solution.path = pkt.solution.path[:0]
 
 	for i, nextNode := range nextNodes {
 
 		var estimate types.Distance
 		cols, err := it.ColsToIterate(nextNode)
 		if err != nil {
-			return 0, nil, err
+			return err
 		}
 
 		for rowIndex, row := range rows {
@@ -148,12 +152,20 @@ func (s *Solver) processTask(it *iterator.Iterator, buf []types.Distance, t task
 
 		distance := t.Distance + s.matrix[currNode][nextNode]
 
-		newTasks[i].Path = path
-		newTasks[i].Distance = distance
-		newTasks[i].Estimate = distance + estimate
+		pkt.newTasks[i].Path = path
+		pkt.newTasks[i].Distance = distance
+		pkt.newTasks[i].Estimate = distance + estimate
 	}
 
-	return nodesLeft, nil, nil
+	return nil
+}
+
+func (s *Solver) newPacket() *processingPacket {
+	pkt := processingPacket{}
+	pkt.newTasks = make([]tasks.Task, len(s.matrix))
+	pkt.solution.path = make([]types.Index, 0, len(s.matrix)+1)
+
+	return &pkt
 }
 
 func (s *Solver) solveParallel() {
@@ -166,41 +178,72 @@ func (s *Solver) solveParallel() {
 		threadscount = 1
 	}
 
-	readyToProcess := make(chan struct{}, threadscount)
-	tasksToProcess := make(chan tasks.Task, threadscount)
-	tasksToQueue := make(chan tasks.Task, threadscount*len(s.matrix))
-	solutionFound := make(chan solution, threadscount)
+	toProcessors := make(chan *processingPacket, threadscount)
+	fromProcessors := make(chan *processingPacket, threadscount)
 	stopProcessing := make(chan struct{}, threadscount)
 
 	for i := 0; i < threadscount; i++ {
-		go s.taskProcessor(readyToProcess, tasksToProcess, tasksToQueue, solutionFound, stopProcessing)
+		go s.taskProcessor(toProcessors, fromProcessors, stopProcessing)
 	}
 
-	busyThreads := threadscount
+	var pkt *processingPacket
+	busyThreads := 0
 
-	var noTasksLeft, chanellsAreClear bool
-	for {
-		select {
-		case <-readyToProcess:
-			busyThreads--
-		case taskToQueue := <-tasksToQueue:
-			s.taskQueue.InsertSingle(taskToQueue)
-		case solution := <-solutionFound:
-			s.newSolutionFound(solution.path, solution.distance)
+	// Sending initial tasks
+	for i := 0; i < threadscount; i++ {
+		if s.taskQueue.IsEmpty() {
+			break
+		}
+		// And we have new work for them
+		task, err := s.taskQueue.PopFirst()
+		if err != nil {
+			panic(err)
 		}
 
-		if threadscount != busyThreads && !s.taskQueue.IsEmpty() {
+		pkt := s.newPacket()
+		pkt.task = task
+		toProcessors <- pkt
+		busyThreads++
+	}
+
+	for {
+		select {
+		case pkt = <-fromProcessors:
+			if len(pkt.newTasks) != 0 {
+				s.taskQueue.Insert(pkt.newTasks)
+			}
+			if len(pkt.solution.path) != 0 {
+				s.newSolutionFound(pkt.solution.path, pkt.solution.distance)
+			}
+
+			if !s.taskQueue.IsEmpty() {
+				task, err := s.taskQueue.PopFirst()
+				if err != nil {
+					panic(err)
+				}
+
+				pkt.task = task
+				toProcessors <- pkt
+			} else {
+				busyThreads--
+			}
+		}
+
+		for busyThreads != threadscount && !s.taskQueue.IsEmpty() {
+			// There are processors waiting for work
+			// and we have new work for them
 			task, err := s.taskQueue.PopFirst()
 			if err != nil {
 				panic(err)
 			}
-			tasksToProcess <- task
+
+			pkt = s.newPacket()
+			pkt.task = task
+			toProcessors <- pkt
 			busyThreads++
 		}
 
-		noTasksLeft = s.taskQueue.IsEmpty() && busyThreads == 0
-		chanellsAreClear = len(tasksToQueue) == 0 && len(solutionFound) == 0
-		if noTasksLeft && chanellsAreClear {
+		if s.taskQueue.IsEmpty() && busyThreads == 0 {
 			break
 		}
 	}

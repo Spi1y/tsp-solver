@@ -1,6 +1,7 @@
 package solver3
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/Spi1y/tsp-solver/solver2/types"
@@ -11,18 +12,52 @@ func TestSolverSolve(t *testing.T) {
 	tests := solverTestCases()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			for i := 0; i < 1+len(tt.distanceMatrix); i++ {
-				s := &Solver{}
-				s.RecursiveThreshold = types.Index(i)
-				path, dist, err := s.Solve(tt.distanceMatrix)
+			s := &Solver{}
+			s.RecursiveThreshold = 0
+			path, dist, err := s.Solve(tt.distanceMatrix)
 
+			// With concurrency we can not predict which of equal length paths
+			// will be processed first and selected as a winner. So for cases where
+			// several equal length paths exist we have to skip checking path
+			// results and check length only
+			if len(tt.path) != 0 {
 				assert.Equal(t, tt.path, path)
-				assert.Equal(t, tt.dist, dist)
-				if tt.wantErr {
-					assert.Error(t, err)
-				} else {
-					assert.NoError(t, err)
-				}
+			}
+			assert.Equal(t, tt.dist, dist)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestSolverSolveRecursiveTail(t *testing.T) {
+	tests := solverTestCases()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for i := 0; i < 1+len(tt.distanceMatrix); i++ {
+				name := fmt.Sprintf("Recursion %v", i)
+				t.Run(name, func(t *testing.T) {
+					s := &Solver{}
+					s.RecursiveThreshold = types.Index(i)
+					path, dist, err := s.Solve(tt.distanceMatrix)
+
+					// With concurrency we can not predict which of equal length paths
+					// will be processed first and selected as a winner. So for cases where
+					// several equal length paths exist we have to skip checking path
+					// results and check length only
+					if len(tt.path) != 0 {
+						assert.Equal(t, tt.path, path)
+					}
+					assert.Equal(t, tt.dist, dist)
+					if tt.wantErr {
+						assert.Error(t, err)
+					} else {
+						assert.NoError(t, err)
+					}
+				})
 			}
 		})
 	}
@@ -30,8 +65,9 @@ func TestSolverSolve(t *testing.T) {
 
 func solverTestCases() []*solveTestCase {
 	result := []*solveTestCase{}
-	result = append(result, solveTestCase2Points())
-	result = append(result, solveTestCase3Points())
+	result = append(result, solveTestCase2PointsSynth())
+	result = append(result, solveTestCase3PointsSynth())
+	result = append(result, solveTestCase4PointsSynth())
 	result = append(result, solveTestCase4Points())
 	result = append(result, solveTestCase7Points())
 
@@ -46,7 +82,7 @@ type solveTestCase struct {
 	wantErr        bool
 }
 
-func solveTestCase2Points() *solveTestCase {
+func solveTestCase2PointsSynth() *solveTestCase {
 	return &solveTestCase{
 		"Normal - 2 points",
 		[][]types.Distance{
@@ -60,7 +96,7 @@ func solveTestCase2Points() *solveTestCase {
 	}
 }
 
-func solveTestCase3Points() *solveTestCase {
+func solveTestCase3PointsSynth() *solveTestCase {
 	return &solveTestCase{
 		"Normal - 3 points",
 		[][]types.Distance{
@@ -71,6 +107,22 @@ func solveTestCase3Points() *solveTestCase {
 		},
 		[]types.Index{0, 1, 3, 2, 0},
 		4,
+		false,
+	}
+}
+
+func solveTestCase4PointsSynth() *solveTestCase {
+	return &solveTestCase{
+		"Synth case - 4 points",
+		[][]types.Distance{
+			{0, 1, 1, 5, 9},
+			{9, 0, 5, 1, 1},
+			{1, 9, 0, 1, 5},
+			{5, 1, 1, 9, 1},
+			{1, 5, 9, 1, 0},
+		},
+		[]types.Index{}, // Several optimal solutions exist
+		5,
 		false,
 	}
 }

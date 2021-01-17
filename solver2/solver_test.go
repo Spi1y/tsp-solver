@@ -34,6 +34,7 @@ func solverTestCases() []*solveTestCase {
 	result = append(result, solveTestCase2Points())
 	result = append(result, solveTestCase3Points())
 	result = append(result, solveTestCase4Points())
+	result = append(result, solveTestCase4PointsSynth())
 	result = append(result, solveTestCase7Points())
 
 	return result
@@ -72,6 +73,22 @@ func solveTestCase3Points() *solveTestCase {
 		},
 		[]types.Index{0, 1, 3, 2, 0},
 		4,
+		false,
+	}
+}
+
+func solveTestCase4PointsSynth() *solveTestCase {
+	return &solveTestCase{
+		"Synth case - 4 points",
+		[][]types.Distance{
+			{0, 1, 1, 5, 9},
+			{9, 0, 5, 1, 1},
+			{1, 9, 0, 1, 5},
+			{5, 1, 1, 9, 1},
+			{1, 5, 9, 1, 0},
+		},
+		[]types.Index{0, 1, 4, 3, 2, 0},
+		5,
 		false,
 	}
 }
