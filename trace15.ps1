@@ -1,6 +1,6 @@
 try
 {
-    go test -bench BenchmarkSolverSize15 . -trace="./.tracedata/trace.out" -cpuprofile "./.tracedata/cpu.prof" -memprofile "./.tracedata/mem.prof"
+    go test -bench BenchmarkSolverSize15/Solver3 . -trace="./.tracedata/trace.out" -cpuprofile "./.tracedata/cpu.prof" -memprofile "./.tracedata/mem.prof"
     $cpu = Start-Process "go.exe" "tool","pprof","-http",":","./.tracedata/cpu.prof" -PassThru
     $mem = Start-Process "go.exe" "tool","pprof","-http",":","./.tracedata/mem.prof" -PassThru
     $trc = Start-Process "go.exe" "tool","trace","./.tracedata/trace.out" -PassThru
