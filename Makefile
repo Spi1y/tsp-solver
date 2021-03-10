@@ -24,7 +24,7 @@ cleanup:
 	goimports -w .
 
 linter: deps cleanup
-	output/tools/golangci-lint run --enable-all --deadline 5m0s --out-format checkstyle > ./output/linter.out
+	output/tools/golangci-lint run --enable-all --deadline 5m0s --out-format checkstyle > ./output/linter.xml
 
 test: init cleanup
 	go test ./... -v -race -covermode=atomic -coverprofile ./output/coverage.out -json > ./output/test_result.json
