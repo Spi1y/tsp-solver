@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.DEFAULT_GOAL := package
+.DEFAULT_GOAL := build
 
 .PHONY: clean cleanup init test build
 
@@ -9,9 +9,7 @@ clean:
 
 init: clean
 	@mkdir output
-	@mkdir output/testing
 	@mkdir output/bin
-	@mkdir output/deploy
 	@mkdir output/tools
 	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b output/tools v1.38.0
 	@output/tools/golangci-lint --version
