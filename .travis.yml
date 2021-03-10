@@ -7,4 +7,5 @@ git:
   depth: false
   quiet: true
 script:
-- make
+  - make linter
+  - make
