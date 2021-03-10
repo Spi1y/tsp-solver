@@ -15,3 +15,7 @@ script:
   - make linter || true
   - make test
   - sonar-scanner
+
+cache:
+  directories:
+    - '$HOME/.sonar/cache'
