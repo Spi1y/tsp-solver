@@ -1,0 +1,21 @@
+language: go
+go:
+- 1.14.x
+os:
+- linux
+dist: xenial
+git:
+  depth: false
+  quiet: true
+addons:
+  sonarcloud:
+    organization: "spi1y"
+
+script:
+  - make linter || true
+  - make test
+  - sonar-scanner
+
+cache:
+  directories:
+    - '$HOME/.sonar/cache'
