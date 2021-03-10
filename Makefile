@@ -24,10 +24,10 @@ cleanup:
 	goimports -w .
 
 linter: deps cleanup
-	@output/tools/golangci-lint run --enable-all --deadline 5m0s --out-format checkstyle | tee ./output/linter.out
+	output/tools/golangci-lint run --enable-all --deadline 5m0s --out-format checkstyle > ./output/linter.out
 
 test: init cleanup
-	go test ./... -v -race -covermode=atomic -coverprofile ./output/coverage.out -json | tee ./output/test_result.json
+	go test ./... -v -race -covermode=atomic -coverprofile ./output/coverage.out -json > ./output/test_result.json
 
 build: test
 	env GOOS=linux GOARCH=amd64 go build -o output/bin/
