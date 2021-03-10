@@ -10,9 +10,6 @@ git:
 addons:
   sonarcloud:
     organization: "spi1y"
-jobs:
-  include:
-    - stage: lint
-      script: make linter || true
-    - stage: test & build
-      script: make
+script:
+  - make linter || true
+  - make
