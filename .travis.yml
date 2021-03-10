@@ -14,6 +14,7 @@ addons:
 script:
   - make linter || true
   - make test
+  - ls output/linter.xml
   - sonar-scanner
 
 cache:
