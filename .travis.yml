@@ -10,8 +10,9 @@ git:
 addons:
   sonarcloud:
     organization: "spi1y"
-    token:
-      secure: "*********"
-script:
-  - make linter || true
-  - make
+jobs:
+  include:
+    - stage: lint
+      script: make linter || true
+    - stage: test & build
+      script: make
