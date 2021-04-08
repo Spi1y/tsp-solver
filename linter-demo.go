@@ -3,9 +3,10 @@ package main
 import "fmt"
 
 func linterDemo() {
-	a := 1
-	b := 1
-	if a == b {
+	switch "demo" {
+	case "demo":
+		fmt.Println("Oh no! It`s true!")
+	case "random":
 		fmt.Println("Oh no! It`s true!")
 	}
 }
