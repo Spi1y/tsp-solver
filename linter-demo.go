@@ -2,11 +2,10 @@ package main
 
 import "fmt"
 
-func linterDemo() {
-	switch "demo" {
-	case "demo":
-		fmt.Println("Oh no! It`s true!")
-	case "random":
-		fmt.Println("Oh no! It`s true!")
+func linterDemo(condition1, condition2 bool) {
+	if condition1 {
+		fmt.Println("cond1")
+	} else if condition1 {
+		fmt.Println("cond2")
 	}
 }
