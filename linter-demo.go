@@ -13,5 +13,7 @@ func linterDemo(condition1, condition2 bool) {
 	b := !(i < 10)
 	fmt.Println(b)
 
-	// FIXME Forgot to fix this
+	username := "hardcoded"
+	password := "OhNo!ItsASecurityRisk!"
+	fmt.Println(username, password)
 }
